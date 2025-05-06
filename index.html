@@ -1,0 +1,4039 @@
+<!doctype html>
+<html lang="fa" dir="rtl"> 
+ <head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>مدیریت وظایف</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6C63FF">
+  <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="مدیریت وظایف">
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"> 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script> 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6C63FF">
+  <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="مدیریت وظایف">
+  <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tahoma', 'Segoe UI', Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #6C63FF;
+            --secondary: #4CAF50;
+            --background: #181818;
+            --card-bg: #222;
+            --text: #f0f0f0;
+            --shadow: rgba(0, 0, 0, 0.3) 0px 8px 24px;
+            --placeholder: #aaa;
+            --border: #444;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            direction: rtl;
+        }
+
+        .sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: var(--card-bg);
+            padding: 20px 0;
+            transition: 0.3s;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            margin-right: 280px;
+            padding: 20px;
+            transition: 0.3s;
+            min-height: 100vh;
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                right: -280px;
+            }
+            
+            .sidebar.active {
+                right: 0;
+            }
+            
+            .main-content {
+                margin-right: 0;
+            }
+        }
+
+        /* دکمه بستن منو در حالت موبایل */
+        .close-sidebar {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            z-index: 1001;
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar.active .close-sidebar {
+                display: flex;
+            }
+        }
+
+        .profile-section {
+            text-align: center;
+            padding: 20px;
+            position: relative;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 10px;
+        }
+
+        .profile-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+            background: #333;
+            box-shadow: var(--shadow);
+        }
+
+        .edit-profile {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+        
+        .edit-profile i {
+            font-size: 18px;
+        }
+
+        .username {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .menu-container {
+            flex: 1;
+            padding: 0 15px;
+            overflow-y: auto;
+        }
+
+        .menu-category {
+            font-size: 12px;
+            color: #999;
+            padding: 10px 15px 5px;
+            text-align: right;
+        }
+
+        .menu-items {
+            margin-bottom: 20px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 15px;
+            margin: 5px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            background: transparent;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .menu-item.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .menu-item.active i {
+            color: white !important;
+        }
+
+        .menu-item i {
+            margin-left: 10px;
+            color: var(--primary);
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .menu-item span {
+            font-size: 16px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+        
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+        
+        /* دکمه منو در حالت موبایل ثابت */
+        @media (max-width: 992px) {
+            .menu-toggle-fixed {
+                position: fixed;
+                bottom: 100px;
+                right: 20px;
+                background: var(--primary);
+                color: white;
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                box-shadow: var(--shadow);
+                z-index: 999;
+                font-size: 20px;
+            }
+        }
+        
+        .menu-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* دکمه برگشت */
+        .back-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+        
+        .back-btn:hover {
+            background: #5953e3;
+        }
+
+        .add-task-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: 0.3s;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .add-task-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .add-task-btn i {
+            font-size: 24px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--primary);
+        }
+        
+        .stat-card:nth-child(2)::before {
+            background: var(--secondary);
+        }
+        
+        .stat-card:nth-child(3)::before {
+            background: #F44336;
+        }
+
+        .stat-card h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: #ccc;
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .stat-card:nth-child(2) .stat-number {
+            color: var(--secondary);
+        }
+        
+        .stat-card:nth-child(3) .stat-number {
+            color: #F44336;
+        }
+        
+        .stat-icon {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            font-size: 36px;
+            opacity: 0.1;
+            color: var(--text);
+        }
+
+        .chart-container {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            height: 300px;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .chart-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .modal-title {
+            font-size: 22px;
+            font-weight: bold;
+        }
+        
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            background: #333;
+            color: var(--text);
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 16px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5953e3;
+        }
+
+        .btn-secondary {
+            background: #444;
+            color: var(--text);
+            margin-left: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background: #555;
+        }
+        
+        .btn-danger {
+            background: #F44336;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+
+        .btn-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .task-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .task-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            position: relative;
+            transition: 0.3s;
+            border-right: 4px solid var(--primary);
+        }
+
+        .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: rgba(0, 0, 0, 0.4) 0px 10px 30px;
+        }
+
+        .task-card h3 {
+            margin-bottom: 10px;
+            color: var(--primary);
+            font-size: 18px;
+            padding-left: 30px; /* فضا برای دکمه‌های اقدام */
+        }
+
+        .task-card p {
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            color: #ccc;
+            font-size: 0.9em;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+
+        .task-actions {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .task-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #ccc;
+            transition: 0.3s;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .task-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--primary);
+        }
+
+        .complete-btn {
+            color: var(--secondary);
+        }
+
+        .delete-btn:hover {
+            color: #F44336;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 0;
+            color: #ccc;
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .empty-state p {
+            color: #999;
+        }
+
+        .task-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background: rgba(255, 152, 0, 0.2);
+            color: #FFA726;
+        }
+
+        .status-completed {
+            background: rgba(76, 175, 80, 0.2);
+            color: #66BB6A;
+        }
+        
+        .status-inprogress {
+            background: rgba(33, 150, 243, 0.2);
+            color: #42A5F5;
+        }
+
+        .completed {
+            opacity: 0.7;
+            border-right-color: var(--secondary);
+        }
+
+        .completed h3 {
+            text-decoration: line-through;
+            color: var(--secondary);
+        }
+
+        /* Persian Calendar Styles */
+        .persian-calendar {
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .calendar-header {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            direction: rtl;
+        }
+
+        .calendar-nav {
+            cursor: pointer;
+            font-size: 20px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+        
+        .calendar-nav:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .calendar-month {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            padding: 10px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 50%;
+            position: relative;
+            transition: 0.3s;
+        }
+
+        .calendar-day:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .calendar-day.current {
+            background: var(--primary);
+            color: white;
+        }
+
+        .calendar-day.with-task::after {
+            content: '';
+            position: absolute;
+            bottom: 3px;
+            width: 6px;
+            height: 6px;
+            background: var(--secondary);
+            border-radius: 50%;
+        }
+
+        .calendar-day.other-month {
+            color: #666;
+        }
+
+        /* Mini Calendar for Dashboard */
+        .mini-calendar {
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .mini-calendar .calendar-days {
+            padding: 5px;
+            gap: 2px;
+        }
+        
+        .mini-calendar .calendar-day {
+            font-size: 14px;
+        }
+
+        /* Date Picker Dialog */
+        .date-picker-dialog {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            z-index: 3000;
+            width: 320px;
+            overflow: hidden;
+        }
+
+        .time-picker {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 15px;
+            border-top: 1px solid var(--border);
+        }
+
+        .time-picker-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .time-display {
+            font-size: 20px;
+            margin: 10px 0;
+        }
+
+        .time-control {
+            display: flex;
+            gap: 10px;
+        }
+
+        .time-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #444;
+            color: var(--text);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+        }
+        
+        .time-btn:hover {
+            background: #555;
+        }
+
+        .date-time-actions {
+            display: flex;
+            justify-content: flex-end;
+            padding: 15px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Daily Timeline */
+        .daily-timeline {
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+        
+        .timeline-container {
+            display: flex;
+            min-width: 1000px;
+            position: relative;
+            height: 120px;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .timeline-hour {
+            flex: 1;
+            text-align: center;
+            border-right: 1px dashed var(--border);
+            padding: 5px;
+            position: relative;
+        }
+        
+        .timeline-hour:last-child {
+            border-right: none;
+        }
+        
+        .timeline-task {
+            position: absolute;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 14px;
+            min-width: 120px;
+            top: 30px;
+            z-index: 10;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .timeline-task:hover {
+            transform: translateY(-3px);
+            box-shadow: rgba(0, 0, 0, 0.4) 0px 5px 15px;
+        }
+        
+        .timeline-task.completed {
+            background: var(--secondary);
+        }
+        
+        .timeline-task.inprogress {
+            background: #2196F3;
+        }
+        
+        /* Weekly View */
+        .weekly-container {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .weekly-day {
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        
+        .weekly-day-header {
+            background: var(--primary);
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .weekly-day-content {
+            padding: 10px;
+            min-height: 150px;
+        }
+        
+        .weekly-task {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            position: relative;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .weekly-task:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .weekly-task.completed {
+            opacity: 0.7;
+            background: rgba(76, 175, 80, 0.1);
+        }
+        
+        .weekly-task.completed h4 {
+            text-decoration: line-through;
+        }
+        
+        .weekly-task h4 {
+            margin: 0 0 5px 0;
+            font-size: 14px;
+        }
+        
+        .week-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+        
+        .week-title {
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .week-control {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .week-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: 0.3s;
+        }
+        
+        .week-btn:hover {
+            background: #5953e3;
+        }
+        
+        /* Search Box */
+        .search-box {
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .search-input input {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            background: #333;
+            color: var(--text);
+        }
+        
+        .search-input input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .search-filters {
+            display: flex;
+            margin-top: 15px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            background: #444;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text);
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .filter-btn:hover {
+            background: #555;
+        }
+        
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        /* Section header */
+        .section-header {
+            margin: 30px 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            position: relative;
+            padding-right: 15px;
+        }
+        
+        .section-title::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+        
+        .section-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* Task status filters */
+        .status-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            flex-wrap: wrap;
+        }
+        
+        .status-filter-btn {
+            background: #444;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text);
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex: 1;
+            justify-content: center;
+            min-width: 120px;
+        }
+        
+        .status-filter-btn:hover {
+            background: #555;
+        }
+        
+        .status-filter-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .status-filter-btn i {
+            font-size: 16px;
+        }
+        
+        /* Improved calendar in form */
+        .calendar-input {
+            position: relative;
+        }
+        
+        .calendar-input input {
+            padding-right: 40px;
+            cursor: pointer;
+        }
+        
+        .calendar-input i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            pointer-events: none;
+        }
+        
+        /* Task card types */
+        .task-card.hourly {
+            border-right-color: #FF9800;
+        }
+        
+        .task-card.hourly h3 {
+            color: #FF9800;
+        }
+        
+        .task-card.daily {
+            border-right-color: #2196F3;
+        }
+        
+        .task-card.daily h3 {
+            color: #2196F3;
+        }
+        
+        .task-card.weekly {
+            border-right-color: #9C27B0;
+        }
+        
+        .task-card.weekly h3 {
+            color: #9C27B0;
+        }
+        
+        .task-card.monthly {
+            border-right-color: #E91E63;
+        }
+        
+        .task-card.monthly h3 {
+            color: #E91E63;
+        }
+        
+        .task-card.completed.hourly {
+            border-right-color: var(--secondary);
+        }
+        
+        .task-card.completed.daily {
+            border-right-color: var(--secondary);
+        }
+        
+        .task-card.completed.weekly {
+            border-right-color: var(--secondary);
+        }
+        
+        .task-card.completed.monthly {
+            border-right-color: var(--secondary);
+        }
+        
+        .task-card.completed h3 {
+            color: var(--secondary) !important;
+        }
+        
+        /* Animation effects */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        @media (max-width: 992px) {
+            .weekly-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-container {
+                height: 250px;
+            }
+            
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+            
+            .weekly-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .weekly-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-input {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .btn-actions {
+                flex-direction: column-reverse;
+                gap: 10px;
+            }
+            
+            .btn-secondary {
+                margin-left: 0;
+            }
+        }
+    </style> 
+ <style type="text/css" id="dcoder_stylesheet">body {
+    font-family: Arial, sans-serif;
+    direction: rtl;
+    text-align: right;
+}
+
+.card {
+    border: 2px solid #007bff;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+
+---</style><style type="text/css" id="dcoder_stylesheet">body {
+    font-family: Arial, sans-serif;
+    direction: rtl;
+    text-align: right;
+}
+
+.card {
+    border: 2px solid #007bff;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+
+---</style></head> 
+ <body> <!-- Sidebar --> 
+  <div class="sidebar" id="sidebar"> 
+   <div class="profile-section"> 
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='35' r='25' fill='%23ddd'/%3E%3Cpath d='M50,100 C78,100 95,85 95,65 C95,45 78,25 50,25 C22,25 5,45 5,65 C5,85 22,100 50,100 Z' fill='%23ddd'/%3E%3C/svg%3E" alt="نمایه" class="profile-image" id="profileImage"> 
+    <div class="username" id="userName">نام کاربر</div> 
+    <div class="edit-profile" onclick="showProfileModal()"> <i class="fas fa-edit"></i> 
+    </div> 
+   </div> 
+   <div class="menu-container">
+    <div class="menu-category">بخش‌های اصلی</div>
+    <div class="menu-items">
+      <div class="menu-item" onclick="showPage('dashboard')"> <span>داشبورد</span><i class="fas fa-chart-line"></i>
+      </div> 
+      <div class="menu-item" onclick="showPage('calendar')"> <span>تقویم شمسی</span><i class="fas fa-calendar"></i>
+      </div>
+      <div class="menu-item" onclick="showPage('search')"> <span>جستجوی وظایف</span><i class="fas fa-search"></i>
+      </div>
+    </div>
+    
+    <div class="menu-category">وظایف</div>
+    <div class="menu-items">
+      <div class="menu-item" onclick="showPage('allTasks')"> <span>همه وظایف</span><i class="fas fa-tasks"></i>
+      </div> 
+      <div class="menu-item" onclick="showPage('completedTasks')"> <span>وظایف انجام شده</span><i class="fas fa-check-circle"></i>
+      </div>
+      <div class="menu-item" onclick="showPage('pendingTasks')"> <span>وظایف در انتظار</span><i class="fas fa-clock"></i>
+      </div>
+      <div class="menu-item" onclick="showPage('inProgressTasks')"> <span>وظایف در حال اجرا</span><i class="fas fa-spinner"></i>
+      </div>
+    </div>
+    
+    <div class="menu-category">دسته‌بندی</div>
+    <div class="menu-items">
+      <div class="menu-item" onclick="showPage('hourly')"> <span>وظایف ساعتی</span><i class="fas fa-hourglass"></i>
+      </div> 
+      <div class="menu-item" onclick="showPage('daily')"> <span>وظایف روزانه</span><i class="fas fa-calendar-day"></i>
+      </div> 
+      <div class="menu-item" onclick="showPage('weekly')"> <span>وظایف هفتگی</span><i class="fas fa-calendar-week"></i>
+      </div> 
+      <div class="menu-item" onclick="showPage('monthly')"> <span>وظایف ماهانه</span><i class="fas fa-calendar-alt"></i>
+      </div>
+    </div>
+    
+    <div class="menu-category">تنظیمات</div>
+    <div class="menu-items">
+      <div class="menu-item" onclick="showPage('settings')"> <span>تنظیمات</span><i class="fas fa-cog"></i>
+      </div>
+    </div>
+   </div> 
+   <!-- دکمه بستن منو در حالت موبایل -->
+   <div class="close-sidebar" onclick="toggleSidebar()"><i class="fas fa-times"></i></div>
+  </div> <!-- Main Content --> 
+  <div class="main-content" id="mainContent"> 
+   <div class="header"> 
+    <h1 id="pageTitle">داشبورد</h1> <button class="menu-toggle" onclick="toggleSidebar()"> <i class="fas fa-bars"></i> </button> 
+   </div> <!-- Dashboard Content --> 
+   <div id="dashboardPage"> 
+    <div class="dashboard-grid"> 
+     <div class="stat-card"> 
+      <h3>کل وظایف</h3> 
+      <p class="stat-number" id="totalTasksCount">0</p> 
+      <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+     </div> 
+     <div class="stat-card"> 
+      <h3>وظایف تکمیل شده</h3> 
+      <p class="stat-number" id="completedTasksCount">0</p> 
+      <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+     </div> 
+     <div class="stat-card"> 
+      <h3>وظایف در انتظار</h3> 
+      <p class="stat-number" id="pendingTasksCount">0</p> 
+      <div class="stat-icon"><i class="fas fa-clock"></i></div>
+     </div> 
+    </div> 
+    
+    <div class="chart-container"> 
+      <div class="chart-header">
+        <div class="chart-title">توزیع وظایف</div>
+      </div>
+      <canvas id="taskChart"></canvas> 
+    </div> 
+    <div class="chart-container"> 
+      <div class="chart-header">
+        <div class="chart-title">وضعیت وظایف</div>
+      </div>
+      <canvas id="progressChart"></canvas> 
+    </div>
+    
+    <div class="section-header">
+      <div class="section-title">تقویم وظایف</div>
+    </div>
+    
+    <div class="mini-calendar">
+      <div class="calendar-header">
+        <div class="calendar-nav" onclick="previousDashboardMonth()"><i class="fas fa-chevron-right"></i></div>
+        <div class="calendar-month" id="dashboardCalendarTitle">ماه ۱۴۰۴</div>
+        <div class="calendar-nav" onclick="nextDashboardMonth()"><i class="fas fa-chevron-left"></i></div>
+      </div>
+      <div class="calendar-weekdays">
+        <div>ش</div>
+        <div>ی</div>
+        <div>د</div>
+        <div>س</div>
+        <div>چ</div>
+        <div>پ</div>
+        <div>ج</div>
+      </div>
+      <div class="calendar-days" id="dashboardCalendarDays"></div>
+    </div>
+    
+    <div class="section-header">
+      <div class="section-title">وظایف امروز</div>
+    </div>
+    
+    <div id="dashboardTasks"></div>
+    
+    <div class="section-header">
+      <div class="section-title">وظایف نزدیک</div>
+    </div>
+    
+    <div id="upcomingTasks" class="task-list"></div>
+   </div>
+   
+   <!-- All Tasks Page -->
+   <div id="allTasksPage" style="display: none;">
+     <button class="back-btn" onclick="showPage('dashboard')"><i class="fas fa-arrow-right"></i> برگشت به داشبورد</button>
+     <div class="status-filters">
+       <button class="status-filter-btn active" data-status="all" onclick="filterTasksByStatus('all')">
+         <i class="fas fa-tasks"></i> همه وظایف
+       </button>
+       <button class="status-filter-btn" data-status="pending" onclick="filterTasksByStatus('pending')">
+         <i class="fas fa-clock"></i> در انتظار
+       </button>
+       <button class="status-filter-btn" data-status="inprogress" onclick="filterTasksByStatus('inprogress')">
+         <i class="fas fa-spinner"></i> در حال اجرا
+       </button>
+       <button class="status-filter-btn" data-status="completed" onclick="filterTasksByStatus('completed')">
+         <i class="fas fa-check-circle"></i> تکمیل شده
+       </button>
+     </div>
+     <div id="allTasksList"></div>
+   </div>
+   
+   <!-- Completed Tasks Page -->
+   <div id="completedTasksPage" style="display: none;">
+     <button class="back-btn" onclick="showPage('dashboard')"><i class="fas fa-arrow-right"></i> برگشت به داشبورد</button>
+     <div id="completedTasksList"></div>
+   </div>
+   
+   <!-- Pending Tasks Page -->
+   <div id="pendingTasksPage" style="display: none;">
+     <button class="back-btn" onclick="showPage('dashboard')"><i class="fas fa-arrow-right"></i> برگشت به داشبورد</button>
+     <div id="pendingTasksList"></div>
+   </div>
+   
+   <!-- In Progress Tasks Page -->
+   <div id="inProgressTasksPage" style="display: none;">
+     <button class="back-btn" onclick="showPage('dashboard')"><i class="fas fa-arrow-right"></i> برگشت به داشبورد</button>
+     <div id="inProgressTasksList"></div>
+   </div>
+   
+   <!-- Search Page -->
+   <div id="searchPage" style="display: none;">
+     <button class="back-btn" onclick="showPage('dashboard')"><i class="fas fa-arrow-right"></i> برگشت به داشبورد</button>
+     <div class="search-box">
+       <div class="search-input">
+         <input type="text" id="searchInput" placeholder="جستجو در وظایف... (عنوان، توضیحات و...)">
+         <button class="btn btn-primary" onclick="searchTasks()">
+           <i class="fas fa-search"></i> جستجو
+         </button>
+       </div>
+       <div class="search-filters">
+         <button class="filter-btn active" data-filter="all" onclick="filterTasks('all')">
+           <i class="fas fa-tasks"></i> همه
+         </button>
+         <button class="filter-btn" data-filter="pending" onclick="filterTasks('pending')">
+           <i class="fas fa-clock"></i> در انتظار
+         </button>
+         <button class="filter-btn" data-filter="inprogress" onclick="filterTasks('inprogress')">
+           <i class="fas fa-spinner"></i> در حال اجرا
+         </button>
+         <button class="filter-btn" data-filter="completed" onclick="filterTasks('completed')">
+           <i class="fas fa-check-circle"></i> تکمیل شده
+         </button>
+       </div>
+     </div>
+     <div id="searchResults"></div>
+   </div>
+   
+   <!-- Settings Page -->
+   <div id="settingsPage" style="display: none;">
+     <button class="back-btn" onclick="showPage('dashboard')"><i class="fas fa-arrow-right"></i> برگشت به داشبورد</button>
+     <div class="section-header">
+       <div class="section-title">تنظیمات ظاهری</div>
+     </div>
+     
+     <div class="search-box">
+       <div class="form-group">
+         <label>رنگ اصلی برنامه:</label>
+         <div class="color-options" style="display: flex; gap: 15px; margin-top: 10px;">
+           <div class="color-option active" style="background-color: #6C63FF; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; border: 2px solid transparent;" data-color="#6C63FF" onclick="changeThemeColor(this)"></div>
+           <div class="color-option" style="background-color: #FF6B6B; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; border: 2px solid transparent;" data-color="#FF6B6B" onclick="changeThemeColor(this)"></div>
+           <div class="color-option" style="background-color: #4CAF50; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; border: 2px solid transparent;" data-color="#4CAF50" onclick="changeThemeColor(this)"></div>
+           <div class="color-option" style="background-color: #FF9800; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; border: 2px solid transparent;" data-color="#FF9800" onclick="changeThemeColor(this)"></div>
+           <div class="color-option" style="background-color: #009688; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; border: 2px solid transparent;" data-color="#009688" onclick="changeThemeColor(this)"></div>
+           <div class="color-option" style="background-color: #673AB7; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; border: 2px solid transparent;" data-color="#673AB7" onclick="changeThemeColor(this)"></div>
+         </div>
+       </div>
+     </div>
+     
+     <div class="section-header">
+       <div class="section-title">مدیریت داده‌ها</div>
+     </div>
+     
+     <div class="search-box">
+       <button class="btn btn-primary" style="margin-bottom: 15px; width: 100%;" onclick="exportData()">
+         <i class="fas fa-download"></i> دریافت پشتیبان از داده‌ها
+       </button>
+       <button class="btn btn-primary" style="margin-bottom: 15px; width: 100%;" onclick="exportDataAsPDF()">
+         <i class="fas fa-file-pdf"></i> دریافت گزارش PDF
+       </button>
+       <button class="btn btn-secondary" style="margin-bottom: 15px; width: 100%;" onclick="importData()">
+         <i class="fas fa-upload"></i> بازیابی داده‌ها
+       </button>
+       <input type="file" id="importFile" style="display: none;" accept=".json" onchange="handleImportFile(event)">
+       <button class="btn btn-danger" style="width: 100%;" onclick="resetData()">
+         <i class="fas fa-trash"></i> پاک کردن همه داده‌ها
+       </button>
+     </div>
+   </div>
+   
+   <!-- Task Pages --> 
+   <div id="hourlyPage" style="display: none;"> 
+    <button class="back-btn" onclick="showPage('dashboard')"><i class="fas fa-arrow-right"></i> برگشت به داشبورد</button>
+    <div class="task-list" id="hourlyTasks"></div> 
+   </div> 
+   
+   <div id="dailyPage" style="display: none;">
+    <button class="back-btn" onclick="showPage('dashboard')"><i class="fas fa-arrow-right"></i> برگشت به داشبورد</button>
+    <div class="section-header">
+      <div class="section-title">خط زمانی وظایف روزانه</div>
+    </div>
+    
+    <div class="daily-timeline">
+      <div class="timeline-container" id="dailyTimeline">
+        <!-- Timeline hours will be added by JS -->
+      </div>
+    </div>
+    
+    <div class="section-header">
+      <div class="section-title">همه وظایف روزانه</div>
+    </div>
+    
+    <div class="task-list" id="dailyTasks"></div> 
+   </div> 
+   
+   <div id="weeklyPage" style="display: none;">
+    <button class="back-btn" onclick="showPage('dashboard')"><i class="fas fa-arrow-right"></i> برگشت به داشبورد</button>
+    <div class="week-nav">
+      <div class="week-title" id="weekTitle">هفته اول فروردین ۱۴۰۴</div>
+      <div class="week-control">
+        <button class="week-btn" onclick="previousWeek()"><i class="fas fa-chevron-right"></i> هفته قبل</button>
+        <button class="week-btn" onclick="nextWeek()">هفته بعد <i class="fas fa-chevron-left"></i></button>
+      </div>
+    </div>
+    <div class="weekly-container" id="weeklyContainer">
+      <!-- Weekly days will be added by JS -->
+    </div>
+    
+    <div class="section-header">
+      <div class="section-title">همه وظایف هفتگی</div>
+    </div>
+    
+    <div class="task-list" id="weeklyTasks"></div> 
+   </div> 
+   
+   <div id="monthlyPage" style="display: none;"> 
+    <button class="back-btn" onclick="showPage('dashboard')"><i class="fas fa-arrow-right"></i> برگشت به داشبورد</button>
+    <div class="task-list" id="monthlyTasks"></div> 
+   </div> 
+   <!-- Persian Calendar Page -->
+   <div id="calendarPage" style="display: none;">
+    <button class="back-btn" onclick="showPage('dashboard')"><i class="fas fa-arrow-right"></i> برگشت به داشبورد</button>
+    <div class="persian-calendar">
+      <div class="calendar-header">
+        <div class="calendar-nav" onclick="previousMonth()"><i class="fas fa-chevron-right"></i></div>
+        <div class="calendar-month" id="calendarTitle">ماه ۱۴۰۴</div>
+        <div class="calendar-nav" onclick="nextMonth()"><i class="fas fa-chevron-left"></i></div>
+      </div>
+      <div class="calendar-weekdays">
+        <div>ش</div>
+        <div>ی</div>
+        <div>د</div>
+        <div>س</div>
+        <div>چ</div>
+        <div>پ</div>
+        <div>ج</div>
+      </div>
+      <div class="calendar-days" id="calendarDays"></div>
+    </div>
+    <div class="section-header">
+      <div class="section-title">وظایف روز انتخاب شده</div>
+    </div>
+    <div class="task-list" id="calendarTasks"></div>
+   </div>
+  </div> <!-- Add Task Button --> <button class="add-task-btn" onclick="showAddTaskModal()"> <i class="fas fa-plus"></i> </button> 
+  
+  <!-- دکمه منو در حالت موبایل ثابت --> 
+  <div class="menu-toggle-fixed" onclick="toggleSidebar()" id="menuToggleFixed"> <i class="fas fa-bars"></i> </div>
+  
+  <!-- Add Task Modal --> 
+  <div class="modal" id="addTaskModal"> 
+   <div class="modal-content"> 
+    <div class="modal-header">
+      <div class="modal-title">افزودن وظیفه جدید</div>
+      <button class="modal-close" onclick="hideAddTaskModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="addTaskForm"> 
+     <div class="form-group"> <label for="taskTitle">عنوان</label> 
+      <input type="text" id="taskTitle" required placeholder="عنوان وظیفه را وارد کنید"> 
+     </div> 
+     <div class="form-group"> <label for="taskDescription">توضیحات</label> <textarea id="taskDescription" rows="3" placeholder="توضیحات وظیفه را وارد کنید"></textarea> 
+     </div> 
+     <div class="form-group"> <label for="taskType">نوع وظیفه</label> <select id="taskType" required> <option value="hourly">ساعتی</option> <option value="daily">روزانه</option> <option value="weekly">هفتگی</option> <option value="monthly">ماهانه</option> </select> 
+     </div> 
+     <div class="form-group"> <label for="taskStatus">وضعیت وظیفه</label> <select id="taskStatus" required> <option value="pending">در انتظار</option> <option value="inprogress">در حال اجرا</option> <option value="completed">تکمیل شده</option> </select> 
+     </div> 
+     <div class="form-group"> <label for="taskDueDate">تاریخ و زمان مهلت</label> 
+      <div class="calendar-input">
+        <input type="text" id="taskDueDate" readonly placeholder="انتخاب تاریخ و زمان" class="date-picker" onclick="showDatePicker(this)">
+        <i class="fas fa-calendar"></i>
+      </div>
+      <input type="hidden" id="taskDueDateTimestamp">
+     </div> 
+     <div class="form-group btn-actions"> 
+       <button type="button" class="btn btn-secondary" onclick="hideAddTaskModal()">
+         <i class="fas fa-times"></i> انصراف
+       </button> 
+       <button type="submit" class="btn btn-primary">
+         <i class="fas fa-plus"></i> افزودن
+       </button> 
+     </div> 
+    </form> 
+   </div> 
+  </div> <!-- Edit Profile Modal --> 
+  <div class="modal" id="profileModal"> 
+   <div class="modal-content"> 
+    <div class="modal-header">
+      <div class="modal-title">ویرایش پروفایل</div>
+      <button class="modal-close" onclick="hideProfileModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="profileForm"> 
+     <div class="form-group"> <label for="profileName">نام</label> 
+      <input type="text" id="profileName" required placeholder="نام خود را وارد کنید"> 
+     </div> 
+     <div class="form-group"> <label for="profileImageInput">تصویر پروفایل</label> 
+      <input type="file" id="profileImageInput" accept="image/*"> 
+     </div> 
+     <div class="form-group btn-actions"> 
+       <button type="button" class="btn btn-secondary" onclick="hideProfileModal()">
+         <i class="fas fa-times"></i> انصراف
+       </button> 
+       <button type="submit" class="btn btn-primary">
+         <i class="fas fa-save"></i> ذخیره
+       </button> 
+     </div> 
+    </form> 
+   </div> 
+  </div> 
+  
+  <!-- Date Picker Dialog -->
+  <div class="date-picker-dialog" id="datePickerDialog">
+    <div class="calendar-header">
+      <div class="calendar-nav" onclick="previousPickerMonth()"><i class="fas fa-chevron-right"></i></div>
+      <div class="calendar-month" id="pickerCalendarTitle">ماه ۱۴۰۴</div>
+      <div class="calendar-nav" onclick="nextPickerMonth()"><i class="fas fa-chevron-left"></i></div>
+    </div>
+    <div class="calendar-weekdays">
+      <div>ش</div>
+      <div>ی</div>
+      <div>د</div>
+      <div>س</div>
+      <div>چ</div>
+      <div>پ</div>
+      <div>ج</div>
+    </div>
+    <div class="calendar-days" id="pickerCalendarDays"></div>
+    <div class="time-picker">
+      <div class="time-picker-column">
+        <div>ساعت</div>
+        <div class="time-control">
+          <button class="time-btn" onclick="changeHour(1)"><i class="fas fa-chevron-up"></i></button>
+          <div class="time-display" id="hourDisplay">۱۲</div>
+          <button class="time-btn" onclick="changeHour(-1)"><i class="fas fa-chevron-down"></i></button>
+        </div>
+      </div>
+      <div class="time-picker-column">
+        <div>دقیقه</div>
+        <div class="time-control">
+          <button class="time-btn" onclick="changeMinute(5)"><i class="fas fa-chevron-up"></i></button>
+          <div class="time-display" id="minuteDisplay">۰۰</div>
+          <button class="time-btn" onclick="changeMinute(-5)"><i class="fas fa-chevron-down"></i></button>
+        </div>
+      </div>
+    </div>
+    <div class="date-time-actions">
+      <button type="button" class="btn btn-secondary" onclick="hideDatePicker()">انصراف</button>
+      <button type="button" class="btn btn-primary" onclick="applyDateTime()">تایید</button>
+    </div>
+  </div>
+  
+  <!-- User Data Preview for PDF -->
+  <div id="pdfContent" style="display: none;">
+    <div id="pdfHeader" style="text-align: center; margin-bottom: 20px;">
+      <h1 style="color: #6C63FF;">گزارش مدیریت وظایف</h1>
+      <p id="pdfUsername"></p>
+      <p id="pdfDate"></p>
+    </div>
+    <div id="pdfStats" style="margin-bottom: 30px;">
+      <h2 style="border-bottom: 2px solid #6C63FF; padding-bottom: 10px; color: #6C63FF;">آمار کلی</h2>
+      <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+        <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 10px; flex: 1; margin: 0 5px;">
+          <h3>کل وظایف</h3>
+          <p id="pdfTotalTasks" style="font-size: 24px; font-weight: bold;"></p>
+        </div>
+        <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 10px; flex: 1; margin: 0 5px;">
+          <h3>تکمیل شده</h3>
+          <p id="pdfCompletedTasks" style="font-size: 24px; font-weight: bold; color: #4CAF50;"></p>
+        </div>
+        <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 10px; flex: 1; margin: 0 5px;">
+          <h3>در انتظار</h3>
+          <p id="pdfPendingTasks" style="font-size: 24px; font-weight: bold; color: #FF9800;"></p>
+        </div>
+      </div>
+    </div>
+    <div id="pdfTasksList">
+      <h2 style="border-bottom: 2px solid #6C63FF; padding-bottom: 10px; color: #6C63FF;">لیست وظایف</h2>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+        <thead>
+          <tr style="background: #6C63FF; color: white;">
+            <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">عنوان</th>
+            <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">نوع</th>
+            <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">وضعیت</th>
+            <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">مهلت</th>
+          </tr>
+        </thead>
+        <tbody id="pdfTasksBody">
+          <!-- Tasks will be populated here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <script>
+    // تبدیل اعداد انگلیسی به فارسی
+    function toPersianNum(num) {
+      const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+      return String(num).replace(/[0-9]/g, function(w) {
+        return persianDigits[+w];
+      });
+    }
+    
+    // تبدیل اعداد فارسی به انگلیسی
+    function toEnglishNum(num) {
+      return String(num).replace(/[۰-۹]/g, function(w) {
+        return String('۰۱۲۳۴۵۶۷۸۹'.indexOf(w));
+      });
+    }
+
+    // ماه‌های فارسی
+    const persianMonths = [
+      'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
+      'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'
+    ];
+    
+    // روزهای هفته
+    const weekDays = [
+      'شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'
+    ];
+    
+    // ذخیره وظایف در متغیر حافظه
+    let tasks = [];
+    
+    // ذخیره اطلاعات کاربر در متغیر حافظه
+    let userProfile = {
+      name: 'نام کاربر',
+      image: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'35\' r=\'25\' fill=\'%23ddd\'/%3E%3Cpath d=\'M50,100 C78,100 95,85 95,65 C95,45 78,25 50,25 C22,25 5,45 5,65 C5,85 22,100 50,100 Z\' fill=\'%23ddd\'/%3E%3C/svg%3E'
+    };
+    
+    // متغیر فیلتر جستجو
+    let searchFilter = 'all';
+    let statusFilter = 'all';
+
+    // متغیرهای تقویم
+    let currentPersianYear = 1404;
+    let currentPersianMonth = 2; // اردیبهشت
+    let currentPersianDay = 15;
+    let selectedPersianDate = {
+      year: currentPersianYear,
+      month: currentPersianMonth,
+      day: currentPersianDay,
+      hour: 12,
+      minute: 0
+    };
+    let targetDatePicker = null;
+    
+    // متغیرهای هفته
+    let currentWeekStart = {
+      year: 1404,
+      month: 2,
+      day: 14 // شنبه هفته‌ی جاری
+    };
+
+    // رسم نمودارها
+    let taskChart;
+    let progressChart;
+    
+    // بررسی آیا localStorage در دسترس است
+    function isLocalStorageAvailable() {
+      try {
+        // تست دسترسی به localStorage
+        localStorage.setItem('test', 'test');
+        localStorage.removeItem('test');
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+    
+    // ذخیره‌سازی داده‌ها در localStorage
+    function saveData() {
+      if (isLocalStorageAvailable()) {
+        try {
+          localStorage.setItem('tasks', JSON.stringify(tasks));
+          localStorage.setItem('userProfile', JSON.stringify(userProfile));
+          localStorage.setItem('themeColor', document.documentElement.style.getPropertyValue('--primary'));
+        } catch (e) {
+          console.error("خطا در ذخیره‌سازی داده‌ها:", e);
+        }
+      }
+    }
+    
+    // بازیابی داده‌ها از localStorage
+    function loadData() {
+      if (isLocalStorageAvailable()) {
+        try {
+          const savedTasks = localStorage.getItem('tasks');
+          if (savedTasks) {
+            tasks = JSON.parse(savedTasks);
+          }
+          
+          const savedProfile = localStorage.getItem('userProfile');
+          if (savedProfile) {
+            userProfile = JSON.parse(savedProfile);
+          }
+          
+          const savedColor = localStorage.getItem('themeColor');
+          if (savedColor) {
+            document.documentElement.style.setProperty('--primary', savedColor);
+            
+            // انتخاب رنگ در صفحه تنظیمات
+            document.querySelectorAll('.color-option').forEach(option => {
+              option.classList.remove('active');
+              if (option.dataset.color === savedColor) {
+                option.classList.add('active');
+              }
+            });
+          }
+        } catch (e) {
+          console.error("خطا در بازیابی داده‌ها:", e);
+        }
+      }
+    }
+    
+    // صادر کردن داده‌ها
+    function exportData() {
+      const data = {
+        tasks: tasks,
+        userProfile: userProfile,
+        themeColor: document.documentElement.style.getPropertyValue('--primary')
+      };
+      
+      const dataStr = JSON.stringify(data);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      
+      const exportFileDefaultName = 'TaskManager_Backup_' + new Date().toLocaleDateString('fa-IR') + '.json';
+      
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+    }
+    
+    // صدور داده‌ها به صورت PDF
+    function exportDataAsPDF() {
+      const { jsPDF } = window.jspdf;
+      
+      // آماده‌سازی محتوای PDF
+      document.getElementById('pdfUsername').textContent = 'کاربر: ' + userProfile.name;
+      document.getElementById('pdfDate').textContent = 'تاریخ: ' + new Date().toLocaleDateString('fa-IR');
+      document.getElementById('pdfTotalTasks').textContent = toPersianNum(tasks.length);
+      
+      const completedCount = tasks.filter(task => task.status === 'completed').length;
+      document.getElementById('pdfCompletedTasks').textContent = toPersianNum(completedCount);
+      
+      const pendingCount = tasks.filter(task => task.status === 'pending' || task.status === 'inprogress').length;
+      document.getElementById('pdfPendingTasks').textContent = toPersianNum(pendingCount);
+      
+      // لیست وظایف
+      const tasksBody = document.getElementById('pdfTasksBody');
+      tasksBody.innerHTML = '';
+      
+      tasks.forEach((task, index) => {
+        let statusText, statusColor;
+        switch (task.status) {
+          case 'completed':
+            statusText = 'تکمیل شده';
+            statusColor = '#4CAF50';
+            break;
+          case 'inprogress':
+            statusText = 'در حال اجرا';
+            statusColor = '#2196F3';
+            break;
+          default:
+            statusText = 'در انتظار';
+            statusColor = '#FF9800';
+        }
+        
+        let typeText;
+        switch (task.type) {
+          case 'hourly': typeText = 'ساعتی'; break;
+          case 'daily': typeText = 'روزانه'; break;
+          case 'weekly': typeText = 'هفتگی'; break;
+          case 'monthly': typeText = 'ماهانه'; break;
+        }
+        
+        // ایجاد ردیف وظیفه
+        const row = document.createElement('tr');
+        row.style.backgroundColor = index % 2 === 0 ? '#f9f9f9' : 'white';
+        
+        row.innerHTML = `
+          <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">${task.title}</td>
+          <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">${typeText}</td>
+          <td style="border: 1px solid #ddd; padding: 12px; text-align: right; color: ${statusColor};">${statusText}</td>
+          <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">${task.dueDate || '---'}</td>
+        `;
+        
+        tasksBody.appendChild(row);
+      });
+      
+      // ایجاد PDF با استفاده از html2canvas
+      const content = document.getElementById('pdfContent');
+      content.style.display = 'block';
+      content.style.width = '800px';
+      content.style.backgroundColor = 'white';
+      content.style.color = 'black';
+      content.style.padding = '40px';
+      
+      html2canvas(content, { scale: 1 }).then(canvas => {
+        content.style.display = 'none';
+        
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
+        const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+        const imgX = (pdfWidth - imgWidth * ratio) / 2;
+        const imgY = 30;
+        
+        pdf.addImage(imgData, 'JPEG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+        pdf.save('گزارش_مدیریت_وظایف.pdf');
+      });
+    }
+    
+    // باز کردن فایل انتخاب برای وارد کردن داده‌ها
+    function importData() {
+      document.getElementById('importFile').click();
+    }
+    
+    // پردازش فایل وارد شده
+    function handleImportFile(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const importedData = JSON.parse(e.target.result);
+            
+            if (importedData.tasks && importedData.userProfile) {
+              tasks = importedData.tasks;
+              userProfile = importedData.userProfile;
+              
+              if (importedData.themeColor) {
+                document.documentElement.style.setProperty('--primary', importedData.themeColor);
+              }
+              
+              saveData();
+              
+              // بروزرسانی رابط کاربری
+              document.getElementById('userName').textContent = userProfile.name;
+              document.getElementById('profileImage').src = userProfile.image;
+              
+              updateAllUI();
+              
+              alert('اطلاعات با موفقیت بازیابی شد');
+            } else {
+              alert('فایل انتخابی معتبر نیست');
+            }
+          } catch (error) {
+            alert('خطا در بازیابی اطلاعات: ' + error.message);
+          }
+        };
+        reader.readAsText(file);
+      }
+    }
+    
+    // بروزرسانی تمام UI
+    function updateAllUI() {
+      loadTasks();
+      updateCalendarTasks();
+      renderDailyTimeline();
+      renderWeeklyView();
+      renderDashboardCalendar();
+      renderAllTasks();
+      renderCompletedTasks();
+      renderPendingTasks();
+      renderInProgressTasks();
+      renderUpcomingTasks();
+      initializeCharts();
+    }
+    
+    // پاک کردن تمام داده‌ها
+    function resetData() {
+      if (confirm('آیا از پاک کردن تمام داده‌ها اطمینان دارید؟ این عمل قابل بازگشت نیست.')) {
+        tasks = [];
+        userProfile = {
+          name: 'نام کاربر',
+          image: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'35\' r=\'25\' fill=\'%23ddd\'/%3E%3Cpath d=\'M50,100 C78,100 95,85 95,65 C95,45 78,25 50,25 C22,25 5,45 5,65 C5,85 22,100 50,100 Z\' fill=\'%23ddd\'/%3E%3C/svg%3E'
+        };
+        
+        document.documentElement.style.setProperty('--primary', '#6C63FF');
+        
+        saveData();
+        
+        // بروزرسانی رابط کاربری
+        document.getElementById('userName').textContent = userProfile.name;
+        document.getElementById('profileImage').src = userProfile.image;
+        
+        updateAllUI();
+        
+        alert('تمام داده‌ها با موفقیت پاک شد');
+      }
+    }
+    
+    // تغییر رنگ اصلی برنامه
+    function changeThemeColor(element) {
+      const color = element.dataset.color;
+      
+      // بروزرسانی متغیر CSS
+      document.documentElement.style.setProperty('--primary', color);
+      
+      // بروزرسانی حالت انتخاب شده
+      document.querySelectorAll('.color-option').forEach(option => {
+        option.classList.remove('active');
+      });
+      element.classList.add('active');
+      
+      // ذخیره در localStorage
+      saveData();
+    }
+    
+    // فیلتر براساس وضعیت
+    function filterTasksByStatus(status) {
+      // بروزرسانی فیلتر فعال
+      document.querySelectorAll('.status-filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelector(`.status-filter-btn[data-status="${status}"]`).classList.add('active');
+      
+      // تنظیم فیلتر
+      statusFilter = status;
+      
+      // بروزرسانی لیست وظایف
+      renderAllTasks();
+    }
+    
+    // جستجو در وظایف
+    function searchTasks() {
+      const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+      const results = document.getElementById('searchResults');
+      
+      // فیلتر وظایف براساس متن جستجو و فیلتر وضعیت
+      const filteredTasks = tasks.filter(task => {
+        const titleMatch = task.title.toLowerCase().includes(searchTerm);
+        const descMatch = task.description && task.description.toLowerCase().includes(searchTerm);
+        
+        // بررسی فیلتر وضعیت
+        if (searchFilter !== 'all') {
+          return (titleMatch || descMatch) && task.status === searchFilter;
+        }
+        
+        return titleMatch || descMatch;
+      });
+      
+      // نمایش نتایج
+      if (filteredTasks.length === 0) {
+        results.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-search"></i>
+            <h3>وظیفه‌ای یافت نشد</h3>
+            <p>لطفاً با عبارت دیگری جستجو کنید</p>
+          </div>
+        `;
+        return;
+      }
+      
+      // ایجاد لیست نتایج
+      results.innerHTML = `<div class="section-header">
+        <div class="section-title">${toPersianNum(filteredTasks.length)} نتیجه یافت شد</div>
+      </div>`;
+      
+      const taskList = document.createElement('div');
+      taskList.className = 'task-list';
+      
+      filteredTasks.forEach(task => {
+        const taskCard = createTaskCard(task);
+        taskList.appendChild(taskCard);
+      });
+      
+      results.appendChild(taskList);
+    }
+    
+    // فیلتر کردن نتایج جستجو
+    function filterTasks(filter) {
+      // بروزرسانی فیلتر فعال
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelector(`.filter-btn[data-filter="${filter}"]`).classList.add('active');
+      
+      // تنظیم فیلتر
+      searchFilter = filter;
+      
+      // اجرای مجدد جستجو
+      searchTasks();
+    }
+    
+    function initializeCharts() {
+      if(taskChart) taskChart.destroy();
+      if(progressChart) progressChart.destroy();
+      
+      // شمارش وظایف به تفکیک نوع
+      const hourlyCount = tasks.filter(task => task.type === 'hourly').length;
+      const dailyCount = tasks.filter(task => task.type === 'daily').length;
+      const weeklyCount = tasks.filter(task => task.type === 'weekly').length;
+      const monthlyCount = tasks.filter(task => task.type === 'monthly').length;
+      
+      // شمارش وظایف به تفکیک وضعیت
+      const completedCount = tasks.filter(task => task.status === 'completed').length;
+      const pendingCount = tasks.filter(task => task.status === 'pending').length;
+      const inProgressCount = tasks.filter(task => task.status === 'inprogress').length;
+      
+      // به‌روزرسانی آمار
+      document.getElementById('totalTasksCount').textContent = toPersianNum(tasks.length);
+      document.getElementById('completedTasksCount').textContent = toPersianNum(completedCount);
+      document.getElementById('pendingTasksCount').textContent = toPersianNum(pendingCount + inProgressCount);
+      
+      // رسم نمودار توزیع وظایف
+      taskChart = new Chart(document.getElementById('taskChart'), {
+        type: 'bar',
+        data: {
+          labels: ['ساعتی', 'روزانه', 'هفتگی', 'ماهانه'],
+          datasets: [{
+            label: 'تعداد وظایف',
+            data: [hourlyCount, dailyCount, weeklyCount, monthlyCount],
+            backgroundColor: ['#FF9800', '#2196F3', '#9C27B0', '#E91E63']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              titleFont: {
+                size: 16
+              },
+              bodyFont: {
+                size: 14
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                font: {
+                  size: 14
+                }
+              }
+            },
+            x: {
+              ticks: {
+                font: {
+                  size: 14
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // رسم نمودار وضعیت وظایف
+      progressChart = new Chart(document.getElementById('progressChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['تکمیل شده', 'در انتظار', 'در حال اجرا'],
+          datasets: [{
+            data: [completedCount, pendingCount, inProgressCount],
+            backgroundColor: ['#4CAF50', '#F44336', '#2196F3']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                font: {
+                  size: 14
+                }
+              }
+            },
+            tooltip: {
+              titleFont: {
+                size: 16
+              },
+              bodyFont: {
+                size: 14
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // نمایش/مخفی کردن منوی کناری
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+    }
+
+    // نمایش صفحات
+    function showPage(pageId) {
+      const pages = ['dashboard', 'hourly', 'daily', 'weekly', 'monthly', 'calendar', 'search', 'settings',
+                    'allTasks', 'completedTasks', 'pendingTasks', 'inProgressTasks'];
+      pages.forEach(page => {
+        document.getElementById(page + 'Page').style.display = page === pageId ? 'block' : 'none';
+      });
+      
+      // تنظیم عنوان صفحه
+      const titles = {
+        'dashboard': 'داشبورد',
+        'hourly': 'وظایف ساعتی',
+        'daily': 'وظایف روزانه',
+        'weekly': 'وظایف هفتگی',
+        'monthly': 'وظایف ماهانه',
+        'calendar': 'تقویم شمسی',
+        'search': 'جستجوی وظایف',
+        'settings': 'تنظیمات',
+        'allTasks': 'همه وظایف',
+        'completedTasks': 'وظایف انجام شده',
+        'pendingTasks': 'وظایف در انتظار',
+        'inProgressTasks': 'وظایف در حال اجرا'
+      };
+      document.getElementById('pageTitle').textContent = titles[pageId];
+      
+      // فعال کردن منوی مربوطه
+      document.querySelectorAll('.menu-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      
+      document.querySelectorAll('.menu-item').forEach(item => {
+        if (item.querySelector('span').textContent === titles[pageId]) {
+          item.classList.add('active');
+        }
+      });
+      
+      // بستن منو در حالت موبایل
+      if (window.innerWidth <= 992) {
+        document.getElementById('sidebar').classList.remove('active');
+      }
+      
+      // اگر صفحه تقویم باشد
+      if (pageId === 'calendar') {
+        renderCalendar();
+      }
+      
+      // اگر صفحه داشبورد باشد
+      if (pageId === 'dashboard') {
+        renderDashboardCalendar();
+        renderUpcomingTasks();
+      }
+      
+      // اگر صفحه وظایف روزانه باشد
+      if (pageId === 'daily') {
+        renderDailyTimeline();
+      }
+      
+      // اگر صفحه وظایف هفتگی باشد
+      if (pageId === 'weekly') {
+        renderWeeklyView();
+      }
+      
+      // اگر صفحه جستجو باشد
+      if (pageId === 'search') {
+        document.getElementById('searchInput').focus();
+      }
+      
+      // اگر صفحه همه وظایف باشد
+      if (pageId === 'allTasks') {
+        renderAllTasks();
+      }
+      
+      // اگر صفحه وظایف تکمیل شده باشد
+      if (pageId === 'completedTasks') {
+        renderCompletedTasks();
+      }
+      
+      // اگر صفحه وظایف در انتظار باشد
+      if (pageId === 'pendingTasks') {
+        renderPendingTasks();
+      }
+      
+      // اگر صفحه وظایف در حال اجرا باشد
+      if (pageId === 'inProgressTasks') {
+        renderInProgressTasks();
+      }
+    }
+
+    // توابع مدال
+    function showAddTaskModal() {
+      selectedPersianDate = {
+        year: currentPersianYear,
+        month: currentPersianMonth,
+        day: currentPersianDay,
+        hour: 12,
+        minute: 0
+      };
+      
+      document.getElementById('taskDueDate').value = formatPersianDate(selectedPersianDate);
+      document.getElementById('taskDueDateTimestamp').value = JSON.stringify(selectedPersianDate);
+      document.getElementById('addTaskModal').style.display = 'block';
+    }
+
+    function hideAddTaskModal() {
+      document.getElementById('addTaskModal').style.display = 'none';
+      document.getElementById('addTaskForm').reset();
+    }
+
+    function showProfileModal() {
+      document.getElementById('profileName').value = userProfile.name;
+      document.getElementById('profileModal').style.display = 'block';
+    }
+    
+    function hideProfileModal() {
+      document.getElementById('profileModal').style.display = 'none';
+    }
+
+    // نمایش انتخابگر تاریخ
+    function showDatePicker(element) {
+      targetDatePicker = element;
+      
+      // بررسی آیا قبلاً تاریخی انتخاب شده
+      const savedDate = document.getElementById('taskDueDateTimestamp').value;
+      if (savedDate) {
+        selectedPersianDate = JSON.parse(savedDate);
+      } else {
+        selectedPersianDate = {
+          year: currentPersianYear,
+          month: currentPersianMonth,
+          day: currentPersianDay,
+          hour: 12,
+          minute: 0
+        };
+      }
+      
+      // تنظیم عنوان تقویم
+      document.getElementById('pickerCalendarTitle').textContent = `${persianMonths[selectedPersianDate.month - 1]} ${toPersianNum(selectedPersianDate.year)}`;
+      
+      // تنظیم ساعت و دقیقه
+      document.getElementById('hourDisplay').textContent = toPersianNum(selectedPersianDate.hour);
+      document.getElementById('minuteDisplay').textContent = toPersianNum(selectedPersianDate.minute < 10 ? '0' + selectedPersianDate.minute : selectedPersianDate.minute);
+      
+      // رندر روزهای تقویم
+      renderPickerCalendar();
+      
+      // نمایش تقویم
+      const dialog = document.getElementById('datePickerDialog');
+      dialog.style.display = 'block';
+      
+      // محاسبه موقعیت
+      const rect = element.getBoundingClientRect();
+      const dialogHeight = 420; // تخمین ارتفاع تقویم
+      
+      let top = rect.bottom + 10;
+      
+      // بررسی آیا فضای کافی در پایین وجود دارد
+      if (top + dialogHeight > window.innerHeight) {
+        top = rect.top - dialogHeight - 10; // نمایش در بالای المان
+      }
+      
+      // اطمینان از اینکه تقویم کاملاً در صفحه قرار دارد
+      if (top < 0) top = 10;
+      
+      dialog.style.top = top + 'px';
+      
+      let left = rect.left;
+      const dialogWidth = 320;
+      
+      // بررسی آیا فضای کافی در سمت چپ وجود دارد
+      if (left + dialogWidth > window.innerWidth) {
+        left = window.innerWidth - dialogWidth - 10;
+      }
+      
+      // اطمینان از اینکه تقویم کاملاً در صفحه قرار دارد
+      if (left < 0) left = 10;
+      
+      dialog.style.left = left + 'px';
+    }
+    
+    function hideDatePicker() {
+      document.getElementById('datePickerDialog').style.display = 'none';
+    }
+
+    // تغییر ماه در انتخابگر تاریخ
+    function previousPickerMonth() {
+      if (selectedPersianDate.month === 1) {
+        selectedPersianDate.month = 12;
+        selectedPersianDate.year--;
+      } else {
+        selectedPersianDate.month--;
+      }
+      
+      document.getElementById('pickerCalendarTitle').textContent = `${persianMonths[selectedPersianDate.month - 1]} ${toPersianNum(selectedPersianDate.year)}`;
+      renderPickerCalendar();
+    }
+    
+    function nextPickerMonth() {
+      if (selectedPersianDate.month === 12) {
+        selectedPersianDate.month = 1;
+        selectedPersianDate.year++;
+      } else {
+        selectedPersianDate.month++;
+      }
+      
+      document.getElementById('pickerCalendarTitle').textContent = `${persianMonths[selectedPersianDate.month - 1]} ${toPersianNum(selectedPersianDate.year)}`;
+      renderPickerCalendar();
+    }
+
+    // تغییر ماه در تقویم داشبورد
+    function previousDashboardMonth() {
+      if (currentPersianMonth === 1) {
+        currentPersianMonth = 12;
+        currentPersianYear--;
+      } else {
+        currentPersianMonth--;
+      }
+      
+      document.getElementById('dashboardCalendarTitle').textContent = `${persianMonths[currentPersianMonth - 1]} ${toPersianNum(currentPersianYear)}`;
+      renderDashboardCalendar();
+    }
+    
+    function nextDashboardMonth() {
+      if (currentPersianMonth === 12) {
+        currentPersianMonth = 1;
+        currentPersianYear++;
+      } else {
+        currentPersianMonth++;
+      }
+      
+      document.getElementById('dashboardCalendarTitle').textContent = `${persianMonths[currentPersianMonth - 1]} ${toPersianNum(currentPersianYear)}`;
+      renderDashboardCalendar();
+    }
+
+    // تغییر ساعت و دقیقه
+    function changeHour(delta) {
+      let hour = selectedPersianDate.hour + delta;
+      
+      if (hour < 0) hour = 23;
+      if (hour > 23) hour = 0;
+      
+      selectedPersianDate.hour = hour;
+      document.getElementById('hourDisplay').textContent = toPersianNum(hour);
+    }
+    
+    function changeMinute(delta) {
+      let minute = selectedPersianDate.minute + delta;
+      
+      if (minute < 0) minute = 55;
+      if (minute > 59) minute = 0;
+      
+      selectedPersianDate.minute = minute;
+      document.getElementById('minuteDisplay').textContent = toPersianNum(minute < 10 ? '0' + minute : minute);
+    }
+
+    // تغییر هفته در نمای هفتگی
+    function previousWeek() {
+      let day = currentWeekStart.day - 7;
+      let month = currentWeekStart.month;
+      let year = currentWeekStart.year;
+      
+      // بررسی تغییر ماه
+      if (day <= 0) {
+        month--;
+        if (month <= 0) {
+          month = 12;
+          year--;
+        }
+        day = getDaysInMonth(year, month) + day;
+      }
+      
+      currentWeekStart = { year, month, day };
+      updateWeekTitle();
+      renderWeeklyView();
+    }
+    
+    function nextWeek() {
+      let day = currentWeekStart.day + 7;
+      let month = currentWeekStart.month;
+      let year = currentWeekStart.year;
+      
+      // بررسی تغییر ماه
+      const daysInMonth = getDaysInMonth(year, month);
+      if (day > daysInMonth) {
+        day = day - daysInMonth;
+        month++;
+        if (month > 12) {
+          month = 1;
+          year++;
+        }
+      }
+      
+      currentWeekStart = { year, month, day };
+      updateWeekTitle();
+      renderWeeklyView();
+    }
+    
+    function updateWeekTitle() {
+      let weekEndDay = currentWeekStart.day + 6;
+      let endMonth = currentWeekStart.month;
+      let endYear = currentWeekStart.year;
+      
+      // بررسی تغییر ماه در انتهای هفته
+      const daysInMonth = getDaysInMonth(endYear, endMonth);
+      if (weekEndDay > daysInMonth) {
+        weekEndDay = weekEndDay - daysInMonth;
+        endMonth++;
+        if (endMonth > 12) {
+          endMonth = 1;
+          endYear++;
+        }
+      }
+      
+      const startFormatted = `${toPersianNum(currentWeekStart.day)} ${persianMonths[currentWeekStart.month-1]} ${toPersianNum(currentWeekStart.year)}`;
+      const endFormatted = `${toPersianNum(weekEndDay)} ${persianMonths[endMonth-1]} ${toPersianNum(endYear)}`;
+      
+      document.getElementById('weekTitle').textContent = `${startFormatted} تا ${endFormatted}`;
+    }
+
+    // اعمال تاریخ و زمان انتخاب شده
+    function applyDateTime() {
+      if (targetDatePicker) {
+        targetDatePicker.value = formatPersianDate(selectedPersianDate);
+        document.getElementById('taskDueDateTimestamp').value = JSON.stringify(selectedPersianDate);
+      }
+      hideDatePicker();
+    }
+
+    // تغییر وضعیت وظیفه
+    function toggleTaskStatus(taskId) {
+      const taskIndex = tasks.findIndex(task => task.id === taskId);
+      
+      if (taskIndex !== -1) {
+        // چرخش بین وضعیت‌ها
+        const statusOrder = ['pending', 'inprogress', 'completed'];
+        const currentStatusIndex = statusOrder.indexOf(tasks[taskIndex].status);
+        const nextStatusIndex = (currentStatusIndex + 1) % statusOrder.length;
+        tasks[taskIndex].status = statusOrder[nextStatusIndex];
+        
+        saveData();
+        updateAllUI();
+      }
+    }
+
+    // حذف وظیفه
+    function deleteTask(taskId) {
+      if (confirm('آیا از حذف این وظیفه اطمینان دارید؟')) {
+        tasks = tasks.filter(task => task.id !== taskId);
+        saveData();
+        updateAllUI();
+      }
+    }
+
+    // فرمت کردن تاریخ فارسی برای نمایش
+    function formatPersianDate(date) {
+      return `${toPersianNum(date.year)}/${toPersianNum(date.month < 10 ? '0' + date.month : date.month)}/${toPersianNum(date.day < 10 ? '0' + date.day : date.day)} - ${toPersianNum(date.hour < 10 ? '0' + date.hour : date.hour)}:${toPersianNum(date.minute < 10 ? '0' + date.minute : date.minute)}`;
+    }
+
+    // تعداد روزهای هر ماه شمسی
+    function getDaysInMonth(year, month) {
+      if (month <= 6) return 31;
+      if (month <= 11) return 30;
+      
+      // اسفند - باید سال کبیسه را بررسی کنیم
+      return isLeapYear(year) ? 30 : 29;
+    }
+    
+    // بررسی سال کبیسه شمسی
+    function isLeapYear(year) {
+      const remainder = year % 33;
+      return (remainder === 1 || remainder === 5 || remainder === 9 || remainder === 13 || 
+              remainder === 17 || remainder === 22 || remainder === 26 || remainder === 30);
+    }
+
+    // روز هفته اول ماه شمسی (0: شنبه، 6: جمعه)
+    function getFirstDayOfMonth(year, month) {
+      // این یک تقریب ساده است برای نمایش
+      const baseDay = 3; // فرض می‌کنیم اول فروردین 1404 چهارشنبه است
+      let totalDays = 0;
+      
+      // محاسبه روزهای سال‌های پیشین از 1404
+      for (let y = 1404; y < year; y++) {
+        totalDays += isLeapYear(y) ? 366 : 365;
+      }
+      
+      // محاسبه روزهای ماه‌های قبلی سال جاری
+      for (let m = 1; m < month; m++) {
+        totalDays += getDaysInMonth(year, m);
+      }
+      
+      return (baseDay + totalDays) % 7;
+    }
+    
+    // محاسبه روز هفته برای تاریخ مشخص (0: شنبه، 6: جمعه)
+    function getDayOfWeek(year, month, day) {
+      const firstDay = getFirstDayOfMonth(year, month);
+      return (firstDay + day - 1) % 7;
+    }
+
+    // نمایش وظایف نزدیک در داشبورد
+    function renderUpcomingTasks() {
+      const container = document.getElementById('upcomingTasks');
+      container.innerHTML = '';
+      
+      // امروز
+      const today = {
+        year: currentPersianYear,
+        month: currentPersianMonth,
+        day: currentPersianDay
+      };
+      
+      // فیلتر وظایف آینده (7 روز آینده)
+      const upcomingTasks = tasks.filter(task => {
+        if (task.dateTime && task.status !== 'completed') {
+          const taskDate = JSON.parse(task.dateTime);
+          
+          // مقایسه تاریخ‌ها برای یافتن وظایف 7 روز آینده
+          if (taskDate.year > today.year) return true;
+          if (taskDate.year < today.year) return false;
+          
+          if (taskDate.month > today.month) return true;
+          if (taskDate.month < today.month) return false;
+          
+          // در همان ماه هستیم، باید روز را بررسی کنیم
+          const dayDiff = taskDate.day - today.day;
+          return dayDiff >= 0 && dayDiff <= 7;
+        }
+        return false;
+      });
+      
+      // مرتب‌سازی بر اساس تاریخ
+      upcomingTasks.sort((a, b) => {
+        const dateA = JSON.parse(a.dateTime);
+        const dateB = JSON.parse(b.dateTime);
+        
+        if (dateA.year !== dateB.year) return dateA.year - dateB.year;
+        if (dateA.month !== dateB.month) return dateA.month - dateB.month;
+        if (dateA.day !== dateB.day) return dateA.day - dateB.day;
+        if (dateA.hour !== dateB.hour) return dateA.hour - dateB.hour;
+        return dateA.minute - dateB.minute;
+      });
+      
+      // محدود کردن به 6 وظیفه برای نمایش بهتر
+      const limitedTasks = upcomingTasks.slice(0, 6);
+      
+      if (limitedTasks.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-calendar-check"></i>
+            <h3>وظیفه نزدیکی وجود ندارد</h3>
+            <p>برای افزودن وظیفه جدید روی دکمه + کلیک کنید</p>
+          </div>
+        `;
+        return;
+      }
+      
+      limitedTasks.forEach(task => {
+        const taskCard = createTaskCard(task);
+        container.appendChild(taskCard);
+      });
+    }
+
+    // رندر کردن تقویم داشبورد
+    function renderDashboardCalendar() {
+      const calendarDays = document.getElementById('dashboardCalendarDays');
+      calendarDays.innerHTML = '';
+      
+      document.getElementById('dashboardCalendarTitle').textContent = `${persianMonths[currentPersianMonth - 1]} ${toPersianNum(currentPersianYear)}`;
+      
+      const daysInMonth = getDaysInMonth(currentPersianYear, currentPersianMonth);
+      const firstDay = getFirstDayOfMonth(currentPersianYear, currentPersianMonth);
+      
+      // روزهای ماه قبل
+      const prevMonth = currentPersianMonth === 1 ? 12 : currentPersianMonth - 1;
+      const prevYear = currentPersianMonth === 1 ? currentPersianYear - 1 : currentPersianYear;
+      const daysInPrevMonth = getDaysInMonth(prevYear, prevMonth);
+      
+      for (let i = 0; i < firstDay; i++) {
+        const day = daysInPrevMonth - firstDay + i + 1;
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day other-month';
+        dayElement.textContent = toPersianNum(day);
+        calendarDays.appendChild(dayElement);
+      }
+      
+      // روزهای ماه جاری
+      for (let i = 1; i <= daysInMonth; i++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+        
+        // بررسی وظایف روز
+        const dayTasks = tasks.filter(task => {
+          if (task.dateTime) {
+            const taskDate = JSON.parse(task.dateTime);
+            return taskDate.year === currentPersianYear && 
+                   taskDate.month === currentPersianMonth && 
+                   taskDate.day === i;
+          }
+          return false;
+        });
+        
+        if (dayTasks.length > 0) {
+          dayElement.classList.add('with-task');
+        }
+        
+        if (i === currentPersianDay && currentPersianMonth === new Date().getMonth() + 1) {
+          dayElement.classList.add('current');
+        }
+        
+        dayElement.textContent = toPersianNum(i);
+        dayElement.addEventListener('click', function() {
+          // حذف حالت انتخاب شده از روز قبلی
+          document.querySelectorAll('#dashboardCalendarDays .current').forEach(el => {
+            if (el !== dayElement) {
+              el.classList.remove('current');
+            }
+          });
+          
+          // اضافه کردن حالت انتخاب شده به روز جدید
+          this.classList.add('current');
+          
+          // نمایش وظایف روز
+          renderDashboardTasks(i);
+        });
+        
+        calendarDays.appendChild(dayElement);
+      }
+      
+      // روزهای ماه بعد
+      const totalCells = 35; // 7 روز × 5 هفته
+      const remainingCells = totalCells - (firstDay + daysInMonth);
+      
+      for (let i = 1; i <= remainingCells; i++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day other-month';
+        dayElement.textContent = toPersianNum(i);
+        calendarDays.appendChild(dayElement);
+      }
+      
+      // نمایش وظایف روز فعلی
+      renderDashboardTasks(currentPersianDay);
+    }
+
+    // نمایش وظایف روز انتخاب شده در داشبورد
+    function renderDashboardTasks(day) {
+      const container = document.getElementById('dashboardTasks');
+      container.innerHTML = '';
+      
+      // فیلتر کردن وظایف بر اساس تاریخ انتخاب شده
+      const dayTasks = tasks.filter(task => {
+        if (task.dateTime) {
+          const taskDate = JSON.parse(task.dateTime);
+          return taskDate.year === currentPersianYear && 
+                 taskDate.month === currentPersianMonth && 
+                 taskDate.day === day;
+        }
+        return false;
+      });
+      
+      if (dayTasks.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-tasks"></i>
+            <h3>هیچ وظیفه‌ای برای ${toPersianNum(day)} ${persianMonths[currentPersianMonth - 1]} یافت نشد</h3>
+            <p>برای افزودن وظیفه جدید روی دکمه + کلیک کنید</p>
+          </div>
+        `;
+        return;
+      }
+      
+      // لیست وظایف
+      const taskList = document.createElement('div');
+      taskList.className = 'task-list';
+      
+      dayTasks.forEach(task => {
+        const taskCard = createTaskCard(task);
+        taskList.appendChild(taskCard);
+      });
+      
+      container.appendChild(taskList);
+    }
+
+    // رندر کردن تقویم انتخابگر تاریخ
+    function renderPickerCalendar() {
+      const calendarDays = document.getElementById('pickerCalendarDays');
+      calendarDays.innerHTML = '';
+      
+      const year = selectedPersianDate.year;
+      const month = selectedPersianDate.month;
+      const daysInMonth = getDaysInMonth(year, month);
+      const firstDay = getFirstDayOfMonth(year, month);
+      
+      // روزهای ماه قبل
+      const prevMonth = month === 1 ? 12 : month - 1;
+      const prevYear = month === 1 ? year - 1 : year;
+      const daysInPrevMonth = getDaysInMonth(prevYear, prevMonth);
+      
+      for (let i = 0; i < firstDay; i++) {
+        const day = daysInPrevMonth - firstDay + i + 1;
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day other-month';
+        dayElement.textContent = toPersianNum(day);
+        calendarDays.appendChild(dayElement);
+      }
+      
+      // روزهای ماه جاری
+      for (let i = 1; i <= daysInMonth; i++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+        if (i === selectedPersianDate.day && month === selectedPersianDate.month && year === selectedPersianDate.year) {
+          dayElement.classList.add('current');
+        }
+        dayElement.textContent = toPersianNum(i);
+        dayElement.addEventListener('click', function() {
+          // حذف حالت انتخاب شده از روز قبلی
+          document.querySelectorAll('#pickerCalendarDays .current').forEach(el => {
+            el.classList.remove('current');
+          });
+          
+          // اضافه کردن حالت انتخاب شده به روز جدید
+          this.classList.add('current');
+          
+          // بروزرسانی تاریخ انتخاب شده
+          selectedPersianDate.day = i;
+        });
+        calendarDays.appendChild(dayElement);
+      }
+      
+      // روزهای ماه بعد
+      const totalCells = 35; // 7 روز × 5 هفته
+      const remainingCells = totalCells - (firstDay + daysInMonth);
+      
+      for (let i = 1; i <= remainingCells; i++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day other-month';
+        dayElement.textContent = toPersianNum(i);
+        calendarDays.appendChild(dayElement);
+      }
+    }
+
+    // تغییر ماه در تقویم اصلی
+    function previousMonth() {
+      if (currentPersianMonth === 1) {
+        currentPersianMonth = 12;
+        currentPersianYear--;
+      } else {
+        currentPersianMonth--;
+      }
+      
+      document.getElementById('calendarTitle').textContent = `${persianMonths[currentPersianMonth - 1]} ${toPersianNum(currentPersianYear)}`;
+      renderCalendar();
+    }
+    
+    function nextMonth() {
+      if (currentPersianMonth === 12) {
+        currentPersianMonth = 1;
+        currentPersianYear++;
+      } else {
+        currentPersianMonth++;
+      }
+      
+      document.getElementById('calendarTitle').textContent = `${persianMonths[currentPersianMonth - 1]} ${toPersianNum(currentPersianYear)}`;
+      renderCalendar();
+    }
+
+    // رندر کردن تقویم اصلی
+    function renderCalendar() {
+      const calendarDays = document.getElementById('calendarDays');
+      calendarDays.innerHTML = '';
+      
+      document.getElementById('calendarTitle').textContent = `${persianMonths[currentPersianMonth - 1]} ${toPersianNum(currentPersianYear)}`;
+      
+      const daysInMonth = getDaysInMonth(currentPersianYear, currentPersianMonth);
+      const firstDay = getFirstDayOfMonth(currentPersianYear, currentPersianMonth);
+      
+      // روزهای ماه قبل
+      const prevMonth = currentPersianMonth === 1 ? 12 : currentPersianMonth - 1;
+      const prevYear = currentPersianMonth === 1 ? currentPersianYear - 1 : currentPersianYear;
+      const daysInPrevMonth = getDaysInMonth(prevYear, prevMonth);
+      
+      for (let i = 0; i < firstDay; i++) {
+        const day = daysInPrevMonth - firstDay + i + 1;
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day other-month';
+        dayElement.textContent = toPersianNum(day);
+        calendarDays.appendChild(dayElement);
+      }
+      
+      // روزهای ماه جاری
+      for (let i = 1; i <= daysInMonth; i++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+        
+        // بررسی وظایف روز
+        const dayTasks = tasks.filter(task => {
+          if (task.dateTime) {
+            const taskDate = JSON.parse(task.dateTime);
+            return taskDate.year === currentPersianYear && 
+                   taskDate.month === currentPersianMonth && 
+                   taskDate.day === i;
+          }
+          return false;
+        });
+        
+        if (dayTasks.length > 0) {
+          dayElement.classList.add('with-task');
+        }
+        
+        if (i === currentPersianDay && currentPersianMonth === new Date().getMonth() + 1) {
+          dayElement.classList.add('current');
+        }
+        
+        dayElement.textContent = toPersianNum(i);
+        dayElement.addEventListener('click', function() {
+          // حذف حالت انتخاب شده از روز قبلی
+          document.querySelectorAll('#calendarDays .current').forEach(el => {
+            if (el !== dayElement) {
+              el.classList.remove('current');
+            }
+          });
+          
+          // اضافه کردن حالت انتخاب شده به روز جدید
+          this.classList.add('current');
+          
+          // بروزرسانی روز انتخاب شده
+          currentPersianDay = i;
+          
+          // نمایش وظایف روز
+          updateCalendarTasks();
+        });
+        
+        calendarDays.appendChild(dayElement);
+      }
+      
+      // روزهای ماه بعد
+      const totalCells = 35; // 7 روز × 5 هفته
+      const remainingCells = totalCells - (firstDay + daysInMonth);
+      
+      for (let i = 1; i <= remainingCells; i++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day other-month';
+        dayElement.textContent = toPersianNum(i);
+        calendarDays.appendChild(dayElement);
+      }
+      
+      // نمایش وظایف روز انتخاب شده
+      updateCalendarTasks();
+    }
+
+    // نمایش خط زمانی وظایف روزانه
+    function renderDailyTimeline() {
+      const timelineContainer = document.getElementById('dailyTimeline');
+      timelineContainer.innerHTML = '';
+      
+      // ایجاد ساعت‌های روز
+      for (let i = 0; i < 24; i++) {
+        const hourElement = document.createElement('div');
+        hourElement.className = 'timeline-hour';
+        hourElement.textContent = toPersianNum(i) + ':00';
+        timelineContainer.appendChild(hourElement);
+      }
+      
+      // فیلتر وظایف روزانه و ساعتی امروز
+      const todayTasks = tasks.filter(task => {
+        if ((task.type === 'daily' || task.type === 'hourly') && task.dateTime) {
+          const taskDate = JSON.parse(task.dateTime);
+          return taskDate.year === currentPersianYear && 
+                 taskDate.month === currentPersianMonth && 
+                 taskDate.day === currentPersianDay;
+        }
+        return false;
+      });
+      
+      // نمایش وظایف در خط زمانی
+      todayTasks.forEach(task => {
+        const taskTime = JSON.parse(task.dateTime);
+        const hour = taskTime.hour;
+        const minute = taskTime.minute;
+        const position = hour * 100 / 24;
+        
+        const taskElement = document.createElement('div');
+        taskElement.className = `timeline-task ${task.status}`;
+        taskElement.style.left = `${position}%`;
+        taskElement.textContent = task.title;
+        taskElement.title = `${task.title} - ${formatPersianDate(taskTime)}`;
+        
+        // اضافه کردن رویداد کلیک برای تغییر وضعیت
+        taskElement.addEventListener('click', function(e) {
+          e.stopPropagation();
+          toggleTaskStatus(task.id);
+        });
+        
+        timelineContainer.appendChild(taskElement);
+      });
+    }
+
+    // رندر نمای هفتگی
+    function renderWeeklyView() {
+      const weeklyContainer = document.getElementById('weeklyContainer');
+      weeklyContainer.innerHTML = '';
+      
+      updateWeekTitle();
+      
+      // ایجاد کارت روزهای هفته
+      for (let i = 0; i < 7; i++) {
+        let day = currentWeekStart.day + i;
+        let month = currentWeekStart.month;
+        let year = currentWeekStart.year;
+        
+        // بررسی انتقال به ماه بعد
+        const daysInMonth = getDaysInMonth(year, month);
+        if (day > daysInMonth) {
+          day = day - daysInMonth;
+          month++;
+          if (month > 12) {
+            month = 1;
+            year++;
+          }
+        }
+        
+        const dayElement = document.createElement('div');
+        dayElement.className = 'weekly-day';
+        
+        // عنوان روز
+        const dayHeader = document.createElement('div');
+        dayHeader.className = 'weekly-day-header';
+        dayHeader.textContent = `${weekDays[i]} - ${toPersianNum(day)}`;
+        dayElement.appendChild(dayHeader);
+        
+        // محتوای روز
+        const dayContent = document.createElement('div');
+        dayContent.className = 'weekly-day-content';
+        
+        // فیلتر وظایف روز
+        const dayTasks = tasks.filter(task => {
+          if (task.dateTime) {
+            const taskDate = JSON.parse(task.dateTime);
+            return taskDate.year === year && 
+                   taskDate.month === month && 
+                   taskDate.day === day;
+          }
+          return false;
+        });
+        
+        if (dayTasks.length === 0) {
+          const emptyText = document.createElement('div');
+          emptyText.style.textAlign = 'center';
+          emptyText.style.padding = '20px 0';
+          emptyText.style.color = '#666';
+          emptyText.textContent = 'بدون وظیفه';
+          dayContent.appendChild(emptyText);
+        } else {
+          dayTasks.forEach(task => {
+            const taskElement = document.createElement('div');
+            taskElement.className = `weekly-task ${task.status}`;
+            
+            const taskTime = JSON.parse(task.dateTime);
+            const timeStr = `${toPersianNum(taskTime.hour < 10 ? '0' + taskTime.hour : taskTime.hour)}:${toPersianNum(taskTime.minute < 10 ? '0' + taskTime.minute : taskTime.minute)}`;
+            
+            taskElement.innerHTML = `
+              <h4>${task.title}</h4>
+              <div style="font-size: 12px; color: #999;">${timeStr}</div>
+            `;
+            
+            // اضافه کردن رویداد کلیک برای تغییر وضعیت
+            taskElement.addEventListener('click', function() {
+              toggleTaskStatus(task.id);
+            });
+            
+            dayContent.appendChild(taskElement);
+          });
+        }
+        
+        dayElement.appendChild(dayContent);
+        weeklyContainer.appendChild(dayElement);
+      }
+      
+      // نمایش وظایف هفتگی در لیست
+      renderWeeklyTasks();
+    }
+
+    // نمایش وظایف هفتگی
+    function renderWeeklyTasks() {
+      const container = document.getElementById('weeklyTasks');
+      container.innerHTML = '';
+      
+      // فیلتر وظایف هفتگی
+      const weeklyTasks = tasks.filter(task => task.type === 'weekly');
+      
+      if (weeklyTasks.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-tasks"></i>
+            <h3>هیچ وظیفه هفتگی یافت نشد</h3>
+            <p>برای افزودن وظیفه جدید روی دکمه + کلیک کنید</p>
+          </div>
+        `;
+        return;
+      }
+      
+      // ایجاد لیست وظایف
+      const taskList = document.createElement('div');
+      taskList.className = 'task-list';
+      
+      weeklyTasks.forEach(task => {
+        const taskCard = createTaskCard(task);
+        taskList.appendChild(taskCard);
+      });
+      
+      container.appendChild(taskList);
+    }
+
+    // به‌روزرسانی وظایف روز انتخاب شده در تقویم
+    function updateCalendarTasks() {
+      const calendarTasks = document.getElementById('calendarTasks');
+      calendarTasks.innerHTML = '';
+      
+      // فیلتر کردن وظایف بر اساس تاریخ انتخاب شده
+      const dayTasks = tasks.filter(task => {
+        if (task.dateTime) {
+          const taskDate = JSON.parse(task.dateTime);
+          return taskDate.year === currentPersianYear && 
+                 taskDate.month === currentPersianMonth && 
+                 taskDate.day === currentPersianDay;
+        }
+        return false;
+      });
+      
+      if (dayTasks.length === 0) {
+        calendarTasks.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-calendar-day"></i>
+            <h3>هیچ وظیفه‌ای برای ${toPersianNum(currentPersianDay)} ${persianMonths[currentPersianMonth - 1]} یافت نشد</h3>
+            <p>برای افزودن وظیفه جدید روی دکمه + کلیک کنید</p>
+          </div>
+        `;
+        return;
+      }
+      
+      // نمایش وظایف روز
+      dayTasks.forEach(task => {
+        const taskCard = createTaskCard(task);
+        calendarTasks.appendChild(taskCard);
+      });
+    }
+    
+    // نمایش همه وظایف
+    function renderAllTasks() {
+      const container = document.getElementById('allTasksList');
+      container.innerHTML = '';
+      
+      // اعمال فیلتر وضعیت
+      let filteredTasks = tasks;
+      if (statusFilter !== 'all') {
+        filteredTasks = tasks.filter(task => task.status === statusFilter);
+      }
+      
+      if (filteredTasks.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-tasks"></i>
+            <h3>هیچ وظیفه‌ای یافت نشد</h3>
+            <p>برای افزودن وظیفه جدید روی دکمه + کلیک کنید</p>
+          </div>
+        `;
+        return;
+      }
+      
+      // ایجاد لیست وظایف
+      const taskList = document.createElement('div');
+      taskList.className = 'task-list';
+      
+      filteredTasks.forEach(task => {
+        const taskCard = createTaskCard(task);
+        taskList.appendChild(taskCard);
+      });
+      
+      container.appendChild(taskList);
+    }
+    
+    // نمایش وظایف تکمیل شده
+    function renderCompletedTasks() {
+      const container = document.getElementById('completedTasksList');
+      container.innerHTML = '';
+      
+      // فیلتر وظایف تکمیل شده
+      const completedTasks = tasks.filter(task => task.status === 'completed');
+      
+      if (completedTasks.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-check-circle"></i>
+            <h3>هیچ وظیفه تکمیل شده‌ای یافت نشد</h3>
+            <p>لطفاً ابتدا وظایف خود را انجام دهید</p>
+          </div>
+        `;
+        return;
+      }
+      
+      // ایجاد لیست وظایف
+      const taskList = document.createElement('div');
+      taskList.className = 'task-list';
+      
+      completedTasks.forEach(task => {
+        const taskCard = createTaskCard(task);
+        taskList.appendChild(taskCard);
+      });
+      
+      container.appendChild(taskList);
+    }
+    
+    // نمایش وظایف در انتظار
+    function renderPendingTasks() {
+      const container = document.getElementById('pendingTasksList');
+      container.innerHTML = '';
+      
+      // فیلتر وظایف در انتظار
+      const pendingTasks = tasks.filter(task => task.status === 'pending');
+      
+      if (pendingTasks.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-clock"></i>
+            <h3>هیچ وظیفه در انتظاری یافت نشد</h3>
+            <p>برای افزودن وظیفه جدید روی دکمه + کلیک کنید</p>
+          </div>
+        `;
+        return;
+      }
+      
+      // ایجاد لیست وظایف
+      const taskList = document.createElement('div');
+      taskList.className = 'task-list';
+      
+      pendingTasks.forEach(task => {
+        const taskCard = createTaskCard(task);
+        taskList.appendChild(taskCard);
+      });
+      
+      container.appendChild(taskList);
+    }
+    
+    // نمایش وظایف در حال اجرا
+    function renderInProgressTasks() {
+      const container = document.getElementById('inProgressTasksList');
+      container.innerHTML = '';
+      
+      // فیلتر وظایف در حال اجرا
+      const inProgressTasks = tasks.filter(task => task.status === 'inprogress');
+      
+      if (inProgressTasks.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-spinner"></i>
+            <h3>هیچ وظیفه در حال اجرایی یافت نشد</h3>
+            <p>برای افزودن وظیفه جدید روی دکمه + کلیک کنید</p>
+          </div>
+        `;
+        return;
+      }
+      
+      // ایجاد لیست وظایف
+      const taskList = document.createElement('div');
+      taskList.className = 'task-list';
+      
+      inProgressTasks.forEach(task => {
+        const taskCard = createTaskCard(task);
+        taskList.appendChild(taskCard);
+      });
+      
+      container.appendChild(taskList);
+    }
+
+    // ایجاد کارت وظیفه
+    function createTaskCard(task) {
+      const taskCard = document.createElement('div');
+      taskCard.className = `task-card ${task.type} ${task.status === 'completed' ? 'completed' : ''}`;
+      
+      let statusText = '';
+      let statusClass = '';
+      
+      switch(task.status) {
+        case 'pending':
+          statusText = 'در انتظار';
+          statusClass = 'status-pending';
+          break;
+        case 'inprogress':
+          statusText = 'در حال اجرا';
+          statusClass = 'status-inprogress';
+          break;
+        case 'completed':
+          statusText = 'تکمیل شده';
+          statusClass = 'status-completed';
+          break;
+      }
+      
+      taskCard.innerHTML = `
+        <h3>${task.title}</h3>
+        <p>${task.description || 'بدون توضیحات'}</p>
+        <div class="task-meta">
+          <span>${task.dueDate}</span>
+          <span class="task-status ${statusClass}">
+            ${statusText}
+          </span>
+        </div>
+        <div class="task-actions">
+          <button class="task-btn" onclick="toggleTaskStatus('${task.id}')">
+            <i class="fas ${task.status === 'completed' ? 'fa-times-circle' : task.status === 'inprogress' ? 'fa-check-circle' : 'fa-spinner'}"></i>
+          </button>
+          <button class="task-btn delete-btn" onclick="deleteTask('${task.id}')">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      `;
+      
+      return taskCard;
+    }
+
+    // ثبت فرم افزودن وظیفه
+    document.getElementById('addTaskForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // بررسی صحت داده‌های فرم
+      const title = document.getElementById('taskTitle').value.trim();
+      if (!title) {
+        alert('لطفاً عنوان وظیفه را وارد کنید');
+        return;
+      }
+      
+      const dateTimeStr = document.getElementById('taskDueDateTimestamp').value;
+      if (!dateTimeStr) {
+        alert('لطفاً تاریخ و زمان را انتخاب کنید');
+        return;
+      }
+      
+      // ایجاد شناسه یکتا
+      const taskId = Date.now().toString();
+      
+      const task = {
+        id: taskId,
+        title: title,
+        description: document.getElementById('taskDescription').value.trim(),
+        type: document.getElementById('taskType').value,
+        status: document.getElementById('taskStatus').value,
+        dateTime: dateTimeStr,
+        dueDate: document.getElementById('taskDueDate').value,
+        createdAt: new Date().toISOString()
+      };
+      
+      // ذخیره وظیفه
+      tasks.push(task);
+      saveData();
+      
+      // به‌روزرسانی رابط کاربری
+      updateAllUI();
+      
+      hideAddTaskModal();
+      this.reset();
+      
+      // نمایش صفحه مربوط به وظیفه
+      showPage(task.type);
+    });
+
+    // ثبت فرم ویرایش پروفایل
+    document.getElementById('profileForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const name = document.getElementById('profileName').value.trim();
+      if (!name) {
+        alert('لطفاً نام خود را وارد کنید');
+        return;
+      }
+      
+      userProfile.name = name;
+      
+      // بررسی آیا فایل تصویر انتخاب شده است
+      const fileInput = document.getElementById('profileImageInput');
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          userProfile.image = event.target.result;
+          
+          // ذخیره در localStorage
+          saveData();
+          
+          // به‌روزرسانی رابط کاربری
+          document.getElementById('userName').textContent = userProfile.name;
+          document.getElementById('profileImage').src = userProfile.image;
+          hideProfileModal();
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        // اگر تصویر جدیدی انتخاب نشده، فقط نام را به‌روزرسانی کن
+        saveData();
+        document.getElementById('userName').textContent = userProfile.name;
+        hideProfileModal();
+      }
+    });
+
+    // رویداد جستجو با کلید Enter
+    document.getElementById('searchInput').addEventListener('keyup', function(e) {
+      if (e.key === 'Enter') {
+        searchTasks();
+      }
+    });
+
+    // بارگذاری وظایف
+    function loadTasks() {
+      const types = ['hourly', 'daily', 'weekly', 'monthly'];
+      
+      types.forEach(type => {
+        const container = document.getElementById(type + 'Tasks');
+        container.innerHTML = '';
+        
+        const typeTasks = tasks.filter(task => task.type === type);
+        
+        if (typeTasks.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-tasks"></i>
+              <h3>هیچ وظیفه ${getTypeLabel(type)} یافت نشد</h3>
+              <p>برای افزودن وظیفه جدید روی دکمه + کلیک کنید</p>
+            </div>
+          `;
+          return;
+        }
+        
+        typeTasks.forEach(task => {
+          const taskCard = createTaskCard(task);
+          container.appendChild(taskCard);
+        });
+      });
+    }
+
+    // تبدیل نوع وظیفه به برچسب فارسی
+    function getTypeLabel(type) {
+      switch(type) {
+        case 'hourly': return 'ساعتی';
+        case 'daily': return 'روزانه';
+        case 'weekly': return 'هفتگی';
+        case 'monthly': return 'ماهانه';
+        default: return '';
+      }
+    }
+
+    // مقداردهی اولیه
+    document.addEventListener('DOMContentLoaded', function() {
+      // بازیابی داده‌ها از localStorage
+      loadData();
+      
+      // نمایش اطلاعات کاربر
+      document.getElementById('userName').textContent = userProfile.name;
+      document.getElementById('profileImage').src = userProfile.image;
+      
+      // بروزرسانی وضعیت منو بر اساس عرض صفحه
+      if (window.innerWidth > 992) {
+        document.getElementById('sidebar').classList.add('active');
+      }
+      
+      // رویداد تغییر اندازه صفحه
+      window.addEventListener('resize', function() {
+        if (window.innerWidth > 992) {
+          document.getElementById('sidebar').classList.add('active');
+        } else {
+          document.getElementById('sidebar').classList.remove('active');
+        }
+      });
+      
+      // بروزرسانی همه بخش‌ها
+      updateAllUI();
+      
+      // انیمیشن
+      gsap.from(".stat-card", {
+        duration: 1,
+        y: 50,
+        opacity: 0,
+        stagger: 0.2,
+        ease: "power2.out"
+      });
+      
+      // نمایش صفحه داشبورد
+      showPage('dashboard');
+    });
+  </script> 
+ 
+<script type="text/javascript" id="dcoder_script">// کلاس خودرو
+class Car {
+    constructor(type, licensePlate, driverName, phoneNumber) {
+        this.type = type;
+        this.licensePlate = licensePlate;
+        this.driverName = driverName;
+        this.phoneNumber = phoneNumber;
+        this.entryTime = new Date();
+        this.spotNumber = null;
+    }
+}
+
+// کلاس پارکینگ
+class ParkingLot {
+    constructor(totalSpots) {
+        this.totalSpots = totalSpots;
+        this.spots = new Array(totalSpots).fill(null);
+        this.hourlyRate = 5000; // نرخ هر ساعت پارکینگ
+        this.initializeRandomCars();
+    }
+
+    initializeRandomCars() {
+        const carTypes = ['pride', 'peugeot_206', 'samand', 'dena', 'haima'];
+        const names = ['علی محمدی', 'رضا احمدی', 'محمد حسینی', 'سارا کریمی'];
+        
+        for(let i = 0; i < 8; i++) {
+            const randomType = carTypes[Math.floor(Math.random() * carTypes.length)];
+            const randomName = names[Math.floor(Math.random() * names.length)];
+            const randomPlate = this.generateRandomPlate();
+            const phoneNumber = '0912' + Math.floor(Math.random() * 9999999).toString();
+            
+            const car = new Car(randomType, randomPlate, randomName, phoneNumber);
+            this.parkCar(car);
+        }
+    }
+
+    generateRandomPlate() {
+        const letters = ['الف', 'ب', 'پ', 'ت', 'ج', 'د'];
+        return {
+            iran: Math.floor(Math.random() * 99),
+            number: Math.floor(Math.random() * 999),
+            letter: letters[Math.floor(Math.random() * letters.length)],
+            region: Math.floor(Math.random() * 99)
+        };
+    }
+
+    getCarSize(carType) {
+        const largeCars = ['haima', 'tucson', 'santafe', 'nissan'];
+        const mediumCars = ['samand', 'dena', 'peugeot_405'];
+        
+        if (largeCars.includes(carType)) return 'large';
+        if (mediumCars.includes(carType)) return 'medium';
+        return 'small';
+    }
+
+    findAvailableSpot(carType) {
+        const size = this.getCarSize(carType);
+        let startSpot, endSpot;
+
+        switch(size) {
+            case 'small':
+                startSpot = 0;
+                endSpot = 6;
+                break;
+            case 'medium':
+                startSpot = 7;
+                endSpot = 13;
+                break;
+            case 'large':
+                startSpot = 14;
+                endSpot = 19;
+                break;
+        }
+
+        for(let i = startSpot; i <= endSpot; i++) {
+            if(this.spots[i] === null) return i;
+        }
+        return -1;
+    }
+
+    parkCar(car) {
+        const spotNumber = this.findAvailableSpot(car.type);
+        if(spotNumber !== -1) {
+            car.spotNumber = spotNumber;
+            this.spots[spotNumber] = car;
+            return true;
+        }
+        return false;
+    }
+
+    removeCar(spotNumber) {
+        const car = this.spots[spotNumber];
+        if(car) {
+            const duration = this.calculateDuration(car.entryTime);
+            const fee = this.calculateFee(duration);
+            this.spots[spotNumber] = null;
+            return { duration, fee };
+        }
+        return null;
+    }
+
+    calculateDuration(entryTime) {
+        const now = new Date();
+        const diff = now - entryTime;
+        return Math.ceil(diff / (1000 * 60 * 60)); // تبدیل به ساعت
+    }
+
+    calculateFee(hours) {
+        return hours * this.hourlyRate;
+    }
+
+    getOccupiedSpots() {
+        return this.spots.filter(spot => spot !== null).length;
+    }
+
+    getAvailableSpots() {
+        return this.totalSpots - this.getOccupiedSpots();
+    }
+}
+
+// ایجاد نمونه پارکینگ
+
+// بروزرسانی نمایش پارکینگ
+function updateParkingLayout() {
+    const parkingLayout = document.getElementById('parkingLayout');
+    parkingLayout.innerHTML = '';
+
+    parkingLot.spots.forEach((spot, index) => {
+        const spotElement = document.createElement('div');
+        spotElement.className = `parking-spot ${spot ? 'occupied' : 'available'}`;
+        
+        if(spot) {
+            spotElement.innerHTML = `
+                <div class="car-info">
+                    <div>جایگاه ${index + 1}</div>
+                    <div>${formatLicensePlate(spot.licensePlate)}</div>
+                    <div>${spot.type.replace('_', ' ')}</div>
+                </div>
+            `;
+        } else {
+            spotElement.innerHTML = `<div>جایگاه ${index + 1}</div>`;
+        }
+
+        parkingLayout.appendChild(spotElement);
+    });
+
+    updateStats();
+    updateExitSpotsList();
+}
+
+// بروزرسانی آمار
+function updateStats() {
+    document.getElementById('totalSpots').textContent = parkingLot.totalSpots;
+    document.getElementById('availableSpots').textContent = parkingLot.getAvailableSpots();
+    document.getElementById('occupiedSpots').textContent = parkingLot.getOccupiedSpots();
+}
+
+// بروزرسانی لیست جایگاه‌های پر برای فرم خروج
+function updateExitSpotsList() {
+    const select = document.getElementById('exitSpotNumber');
+    select.innerHTML = '<option value="">انتخاب کنید</option>';
+    
+    parkingLot.spots.forEach((spot, index) => {
+        if(spot) {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = `جایگاه ${index + 1} - ${formatLicensePlate(spot.licensePlate)}`;
+            select.appendChild(option);
+        }
+    });
+}
+
+// فرمت کردن شماره پلاک
+function formatLicensePlate(plate) {
+    return `${plate.iran} ایران ${plate.number} ${plate.letter} ${plate.region}`;
+}
+
+// مدیریت فرم ورود
+document.getElementById('carEntryForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const licensePlate = {
+        iran: document.getElementById('plate-iran').value,
+        number: document.getElementById('plate-number').value,
+        letter: document.getElementById('plate-letter').value,
+        region: document.getElementById('plate-region').value
+    };
+
+    const car = new Car(
+        document.getElementById('carType').value,
+        licensePlate,
+        document.getElementById('driverName').value,
+        document.getElementById('phoneNumber').value
+    );
+
+    if(parkingLot.parkCar(car)) {
+        alert('خودرو با موفقیت پارک شد');
+        this.reset();
+        updateParkingLayout();
+    } else {
+        alert('متأسفانه جایگاه خالی موجود نیست');
+    }
+});
+
+// مدیریت فرم خروج
+document.getElementById('carExitForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const spotNumber = document.getElementById('exitSpotNumber').value;
+    if(spotNumber === '') {
+        alert('لطفاً یک جایگاه را انتخاب کنید');
+        return;
+    }
+
+    const result = parkingLot.removeCar(parseInt(spotNumber));
+    if(result) {
+        alert(`خودرو با موفقیت خارج شد\nمدت توقف: ${result.duration} ساعت\nهزینه: ${result.fee} تومان`);
+        this.reset();
+        document.getElementById('exitFee').value = '';
+        document.getElementById('parkingDuration').value = '';
+        updateParkingLayout();
+    }
+});
+
+// نمایش اطلاعات هزینه و مدت توقف هنگام انتخاب جایگاه
+document.getElementById('exitSpotNumber').addEventListener('change', function() {
+    const spotNumber = this.value;
+    if(spotNumber === '') {
+        document.getElementById('exitFee').value = '';
+        document.getElementById('parkingDuration').value = '';
+        return;
+    }
+
+    const car = parkingLot.spots[spotNumber];
+    const duration = parkingLot.calculateDuration(car.entryTime);
+    const fee = parkingLot.calculateFee(duration);
+
+    document.getElementById('exitFee').value = fee.toLocaleString() + ' تومان';
+    document.getElementById('parkingDuration').value = duration + ' ساعت';
+});
+
+// اعتبارسنجی ورودی‌های عددی پلاک
+document.querySelectorAll('#plate-iran, #plate-number, #plate-region').forEach(input => {
+    input.addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+});
+
+// نمایش اولیه
+updateParkingLayout();</script><script type="text/javascript" id="dcoder_script">// کلاس خودرو
+class Car {
+    constructor(type, licensePlate, driverName, phoneNumber) {
+        this.type = type;
+        this.licensePlate = licensePlate;
+        this.driverName = driverName;
+        this.phoneNumber = phoneNumber;
+        this.entryTime = new Date();
+        this.spotNumber = null;
+    }
+}
+
+// کلاس پارکینگ
+class ParkingLot {
+    constructor(totalSpots) {
+        this.totalSpots = totalSpots;
+        this.spots = new Array(totalSpots).fill(null);
+        this.hourlyRate = 5000; // نرخ هر ساعت پارکینگ
+        this.initializeRandomCars();
+    }
+
+    initializeRandomCars() {
+        const carTypes = ['pride', 'peugeot_206', 'samand', 'dena', 'haima'];
+        const names = ['علی محمدی', 'رضا احمدی', 'محمد حسینی', 'سارا کریمی'];
+        
+        for(let i = 0; i < 8; i++) {
+            const randomType = carTypes[Math.floor(Math.random() * carTypes.length)];
+            const randomName = names[Math.floor(Math.random() * names.length)];
+            const randomPlate = this.generateRandomPlate();
+            const phoneNumber = '0912' + Math.floor(Math.random() * 9999999).toString();
+            
+            const car = new Car(randomType, randomPlate, randomName, phoneNumber);
+            this.parkCar(car);
+        }
+    }
+
+    generateRandomPlate() {
+        const letters = ['الف', 'ب', 'پ', 'ت', 'ج', 'د'];
+        return {
+            iran: Math.floor(Math.random() * 99),
+            number: Math.floor(Math.random() * 999),
+            letter: letters[Math.floor(Math.random() * letters.length)],
+            region: Math.floor(Math.random() * 99)
+        };
+    }
+
+    getCarSize(carType) {
+        const largeCars = ['haima', 'tucson', 'santafe', 'nissan'];
+        const mediumCars = ['samand', 'dena', 'peugeot_405'];
+        
+        if (largeCars.includes(carType)) return 'large';
+        if (mediumCars.includes(carType)) return 'medium';
+        return 'small';
+    }
+
+    findAvailableSpot(carType) {
+        const size = this.getCarSize(carType);
+        let startSpot, endSpot;
+
+        switch(size) {
+            case 'small':
+                startSpot = 0;
+                endSpot = 6;
+                break;
+            case 'medium':
+                startSpot = 7;
+                endSpot = 13;
+                break;
+            case 'large':
+                startSpot = 14;
+                endSpot = 19;
+                break;
+        }
+
+        for(let i = startSpot; i <= endSpot; i++) {
+            if(this.spots[i] === null) return i;
+        }
+        return -1;
+    }
+
+    parkCar(car) {
+        const spotNumber = this.findAvailableSpot(car.type);
+        if(spotNumber !== -1) {
+            car.spotNumber = spotNumber;
+            this.spots[spotNumber] = car;
+            return true;
+        }
+        return false;
+    }
+
+    removeCar(spotNumber) {
+        const car = this.spots[spotNumber];
+        if(car) {
+            const duration = this.calculateDuration(car.entryTime);
+            const fee = this.calculateFee(duration);
+            this.spots[spotNumber] = null;
+            return { duration, fee };
+        }
+        return null;
+    }
+
+    calculateDuration(entryTime) {
+        const now = new Date();
+        const diff = now - entryTime;
+        return Math.ceil(diff / (1000 * 60 * 60)); // تبدیل به ساعت
+    }
+
+    calculateFee(hours) {
+        return hours * this.hourlyRate;
+    }
+
+    getOccupiedSpots() {
+        return this.spots.filter(spot => spot !== null).length;
+    }
+
+    getAvailableSpots() {
+        return this.totalSpots - this.getOccupiedSpots();
+    }
+}
+
+// ایجاد نمونه پارکینگ
+const parkingLot = new ParkingLot(20);
+
+// بروزرسانی نمایش پارکینگ
+function updateParkingLayout() {
+    const parkingLayout = document.getElementById('parkingLayout');
+    parkingLayout.innerHTML = '';
+
+    parkingLot.spots.forEach((spot, index) => {
+        const spotElement = document.createElement('div');
+        spotElement.className = `parking-spot ${spot ? 'occupied' : 'available'}`;
+        
+        if(spot) {
+            spotElement.innerHTML = `
+                <div class="car-info">
+                    <div>جایگاه ${index + 1}</div>
+                    <div>${formatLicensePlate(spot.licensePlate)}</div>
+                    <div>${spot.type.replace('_', ' ')}</div>
+                </div>
+            `;
+        } else {
+            spotElement.innerHTML = `<div>جایگاه ${index + 1}</div>`;
+        }
+
+        parkingLayout.appendChild(spotElement);
+    });
+
+    updateStats();
+    updateExitSpotsList();
+}
+
+// بروزرسانی آمار
+function updateStats() {
+    document.getElementById('totalSpots').textContent = parkingLot.totalSpots;
+    document.getElementById('availableSpots').textContent = parkingLot.getAvailableSpots();
+    document.getElementById('occupiedSpots').textContent = parkingLot.getOccupiedSpots();
+}
+
+// بروزرسانی لیست جایگاه‌های پر برای فرم خروج
+function updateExitSpotsList() {
+    const select = document.getElementById('exitSpotNumber');
+    select.innerHTML = '<option value="">انتخاب کنید</option>';
+    
+    parkingLot.spots.forEach((spot, index) => {
+        if(spot) {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = `جایگاه ${index + 1} - ${formatLicensePlate(spot.licensePlate)}`;
+            select.appendChild(option);
+        }
+    });
+}
+
+// فرمت کردن شماره پلاک
+function formatLicensePlate(plate) {
+    return `${plate.iran} ایران ${plate.number} ${plate.letter} ${plate.region}`;
+}
+
+// مدیریت فرم ورود
+document.getElementById('carEntryForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const licensePlate = {
+        iran: document.getElementById('plate-iran').value,
+        number: document.getElementById('plate-number').value,
+        letter: document.getElementById('plate-letter').value,
+        region: document.getElementById('plate-region').value
+    };
+
+    const car = new Car(
+        document.getElementById('carType').value,
+        licensePlate,
+        document.getElementById('driverName').value,
+        document.getElementById('phoneNumber').value
+    );
+
+    if(parkingLot.parkCar(car)) {
+        alert('خودرو با موفقیت پارک شد');
+        this.reset();
+        updateParkingLayout();
+    } else {
+        alert('متأسفانه جایگاه خالی موجود نیست');
+    }
+});
+
+// مدیریت فرم خروج
+document.getElementById('carExitForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const spotNumber = document.getElementById('exitSpotNumber').value;
+    if(spotNumber === '') {
+        alert('لطفاً یک جایگاه را انتخاب کنید');
+        return;
+    }
+
+    const result = parkingLot.removeCar(parseInt(spotNumber));
+    if(result) {
+        alert(`خودرو با موفقیت خارج شد\nمدت توقف: ${result.duration} ساعت\nهزینه: ${result.fee} تومان`);
+        this.reset();
+        document.getElementById('exitFee').value = '';
+        document.getElementById('parkingDuration').value = '';
+        updateParkingLayout();
+    }
+});
+
+// نمایش اطلاعات هزینه و مدت توقف هنگام انتخاب جایگاه
+document.getElementById('exitSpotNumber').addEventListener('change', function() {
+    const spotNumber = this.value;
+    if(spotNumber === '') {
+        document.getElementById('exitFee').value = '';
+        document.getElementById('parkingDuration').value = '';
+        return;
+    }
+
+    const car = parkingLot.spots[spotNumber];
+    const duration = parkingLot.calculateDuration(car.entryTime);
+    const fee = parkingLot.calculateFee(duration);
+
+    document.getElementById('exitFee').value = fee.toLocaleString() + ' تومان';
+    document.getElementById('parkingDuration').value = duration + ' ساعت';
+});
+
+// اعتبارسنجی ورودی‌های عددی پلاک
+document.querySelectorAll('#plate-iran, #plate-number, #plate-region').forEach(input => {
+    input.addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+});
+
+// نمایش اولیه
+updateParkingLayout();</script>
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(registration => {
+          console.log('Service Worker ثبت شد:', registration.scope);
+        })
+        .catch(error => {
+          console.error('خطا در ثبت Service Worker:', error);
+        });
+    });
+  }
+</body>
+</html>
